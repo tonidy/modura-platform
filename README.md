@@ -84,6 +84,7 @@ Nothing is listed as shipped unless a command, a test or a file proves it.
 | A shared Go runtime library (contract middleware) | Copied between Go services until it is worth a library |
 | DevHub, CEL policies, workflows, dynamic fields, a second storage adapter | Post-v1 |
 
+
 ## Development
 
 Requirements: Node 24 (pinned in `mise.toml`), pnpm 10, Go 1.27, and Docker or Podman with Compose for Postgres.
