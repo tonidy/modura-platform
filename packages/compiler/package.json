@@ -1,11 +1,16 @@
 {
   "name": "@modura/compiler",
   "version": "1.0.0-rc.2",
-  "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./testing": "./src/testing/arbitraries.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/arbitraries.d.ts",
+      "import": "./dist/testing/arbitraries.js"
+    }
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
@@ -14,9 +19,21 @@
   "dependencies": {
     "@modura/runtime-contracts": "workspace:*",
     "@modura/schema": "workspace:*",
-    "ajv": "8.20.0"
-  },
-  "devDependencies": {
+    "ajv": "8.20.0",
     "fast-check": "4.10.2"
-  }
+  },
+  "devDependencies": {},
+  "license": "MIT",
+  "repository": "https://github.com/tonidy/modura-platform",
+  "files": [
+    "dist",
+    "deno.json",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "description": "Compile, validate, hash, and compare Modura contract IR documents."
 }

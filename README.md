@@ -6,7 +6,7 @@ The platform is built and tested against a real application: a point-of-sale sys
 
 ## Using it
 
-The packages are currently versioned `1.0.0-rc.2` and pass a JSR publish dry-run in CI, but have not been published yet. Package publication (including the registry and release workflow) is not configured. See [docs/stability.md](docs/stability.md) for the versioning policy.
+The packages are versioned `1.0.0-rc.2` and pass a JSR publish dry-run in CI. npm-ready JavaScript/declaration artifacts and a GitHub Actions release workflow are in place; the initial npm bootstrap publish has not happened yet. See [docs/stability.md](docs/stability.md) for the versioning policy and [npm publishing](docs/npm-publishing.md) for release setup.
 
 ```ts
 // modura.config.ts

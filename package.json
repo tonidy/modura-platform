@@ -13,12 +13,16 @@
     "generate": "pnpm modura generate && pnpm --filter @modura/registry-go --filter @modura/example-calculator run generate",
     "registry": "DATABASE_URL=${DATABASE_URL:-postgres://modura:modura@localhost:${MODURA_PG_PORT:-55433}/modura?sslmode=disable} go -C apps/registry-go run ./cmd/registry-api",
     "db:up": "docker compose up -d --wait postgres",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "build:npm": "node scripts/build-npm.mjs",
+    "publish:npm": "node scripts/publish-npm.mjs",
+    "postinstall": "node scripts/build-npm.mjs"
   },
   "devDependencies": {
     "@modura/cli": "workspace:*",
     "@modura/module-registry": "workspace:*",
     "@types/node": "^24.19.2",
+    "esbuild": "0.28.2",
     "nx": "23.3.0",
     "oxlint": "1.87.0",
     "tsx": "4.23.15",

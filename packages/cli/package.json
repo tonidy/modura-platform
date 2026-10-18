@@ -1,11 +1,16 @@
 {
   "name": "@modura/cli",
   "version": "1.0.0-rc.2",
-  "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/config.ts",
-    "./main": "./src/main.ts"
+    ".": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
+    "./main": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.js"
+    }
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
@@ -26,5 +31,18 @@
   "devDependencies": {
     "@modura/example-calculator": "workspace:*",
     "fast-check": "4.10.2"
-  }
+  },
+  "license": "MIT",
+  "repository": "https://github.com/tonidy/modura-platform",
+  "files": [
+    "dist",
+    "deno.json",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/config.js",
+  "types": "./dist/config.d.ts",
+  "description": "Modura CLI for generating artifacts, compatibility checks, and contract releases."
 }

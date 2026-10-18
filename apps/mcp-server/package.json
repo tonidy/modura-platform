@@ -1,11 +1,16 @@
 {
   "name": "@modura/mcp-server",
   "version": "1.0.0-rc.2",
-  "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/server.ts",
-    "./main": "./src/main.ts"
+    ".": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./main": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.js"
+    }
   },
   "scripts": {
     "start": "cd ../.. && tsx apps/mcp-server/src/main.ts",
@@ -15,5 +20,18 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
     "@modura/sdk": "workspace:*"
-  }
+  },
+  "license": "MIT",
+  "repository": "https://github.com/tonidy/modura-platform",
+  "files": [
+    "dist",
+    "deno.json",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "description": "Read-only MCP server for Modura service APIs."
 }

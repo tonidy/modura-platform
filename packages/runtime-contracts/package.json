@@ -1,12 +1,27 @@
 {
   "name": "@modura/runtime-contracts",
   "version": "1.0.0-rc.2",
-  "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
-  }
+  },
+  "license": "MIT",
+  "repository": "https://github.com/tonidy/modura-platform",
+  "files": [
+    "dist",
+    "deno.json",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "description": "Shared error categories, definitions, and wire types for Modura services."
 }

@@ -1,15 +1,30 @@
 {
   "name": "@modura/module-registry",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0-rc.2",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@modura/schema": "workspace:*"
-  }
+  },
+  "license": "MIT",
+  "repository": "https://github.com/tonidy/modura-platform",
+  "files": [
+    "dist",
+    "deno.json",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "description": "Modura contract definition for the Contract Registry service."
 }

@@ -1,0 +1,30 @@
+name: Publish npm packages
+
+on:
+  push:
+    tags: ["npm-v*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Install npm with trusted-publishing support
+        run: npm install --global npm@latest
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify
+      - run: pnpm build:npm
+      - name: Publish packages with npm provenance
+        run: node scripts/publish-npm.mjs --publish
+        env:
+          NPM_PROVENANCE: "1"
