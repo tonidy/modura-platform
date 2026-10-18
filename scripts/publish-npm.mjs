@@ -51,6 +51,22 @@ try {
         }
       }
     }
+    if (publish) {
+      try {
+        const existing = execFileSync('npm', ['view', `${manifest.name}@${manifest.version}`, 'version'], {
+          cwd: packageDir,
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }).trim();
+        if (existing === manifest.version) {
+          console.log(`Already published ${manifest.name}@${manifest.version}; skipping immutable version.`);
+          continue;
+        }
+      } catch (error) {
+        const stderr = error.stderr?.toString() ?? '';
+        if (!stderr.includes('E404')) throw error;
+      }
+    }
     console.log(`${publish ? 'Publishing' : 'Packed'} ${manifest.name}@${manifest.version}: ${archivePath}`);
     if (publish) {
       const tag = manifest.version.includes('-') ? 'next' : 'latest';
