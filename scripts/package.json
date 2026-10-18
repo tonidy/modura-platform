@@ -1,0 +1,15 @@
+{
+  "name": "@modura/scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "parity": "bash compat-parity.sh"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "@modura/compiler",
+      "@modura/registry-go"
+    ]
+  }
+}

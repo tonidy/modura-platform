@@ -1,0 +1,21 @@
+{
+  "name": "@modura/registry-go",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "generate": "go generate ./...",
+    "generate-check": "bash scripts/generate-check.sh",
+    "typecheck": "go vet ./...",
+    "test": "go test ./...",
+    "build": "go build ./...",
+    "fuzz": "go test -run='^$' -fuzz=FuzzParse -fuzztime=10s ./internal/ir && go test -run='^$' -fuzz=FuzzCheck -fuzztime=10s ./internal/compat"
+  },
+  "nx": {
+    "implicitDependencies": ["@modura/cli"],
+    "targets": {
+      "test": {
+        "cache": false
+      }
+    }
+  }
+}

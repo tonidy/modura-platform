@@ -1,0 +1,30 @@
+{
+  "name": "@modura/cli",
+  "version": "1.0.0-rc.2",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/config.ts",
+    "./main": "./src/main.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "generate-check": "tsx src/main.ts generate --check --strict",
+    "registry-check": "tsx src/main.ts registry verify && tsx src/main.ts compat --against registry",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modura/compiler": "workspace:*",
+    "@modura/generator-mcp": "workspace:*",
+    "@modura/generator-openapi": "workspace:*",
+    "@modura/generator-sdk-ts": "workspace:*",
+    "@modura/module-registry": "workspace:*",
+    "@modura/schema": "workspace:*",
+    "@modura/sdk": "workspace:*",
+    "ajv": "8.20.0"
+  },
+  "devDependencies": {
+    "@modura/example-calculator": "workspace:*",
+    "fast-check": "4.10.2"
+  }
+}

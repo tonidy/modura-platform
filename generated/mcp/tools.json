@@ -1,0 +1,251 @@
+{
+  "tools": [
+    {
+      "_meta": {
+        "modura/operation": "registry.getRelease",
+        "modura/requires": [
+          "registry.read"
+        ],
+        "modura/service": "registry-go"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Get one contract release, or the latest if no number is given, with its IR and its changes against the previous release.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "description": "Sequential release number, starting at 1.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "name": "registry_getRelease",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "ir": {},
+          "release": {
+            "additionalProperties": false,
+            "properties": {
+              "changes": {
+                "description": "Changes against the previous release. Empty for the first.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One difference found by the compatibility check (ADR-0002, ADR-0010).",
+                  "properties": {
+                    "message": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "module": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "path": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "severity": {
+                      "description": "breaking: the wire contract; source: generated code only; safe: neither.",
+                      "enum": [
+                        "breaking",
+                        "source",
+                        "safe"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "module",
+                    "path",
+                    "severity"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "summary": {
+                "additionalProperties": false,
+                "properties": {
+                  "irSha256": {
+                    "description": "SHA-256 of the canonical IR.",
+                    "pattern": "^[0-9a-f]{64}$",
+                    "type": "string"
+                  },
+                  "irVersion": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "modules": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "maxLength": 60,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "version": {
+                          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "version"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "number": {
+                    "description": "Sequential release number, starting at 1.",
+                    "format": "int64",
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "publishedAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "publishedBy": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "irSha256",
+                  "irVersion",
+                  "modules",
+                  "number",
+                  "publishedAt",
+                  "publishedBy"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "changes",
+              "summary"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "ir",
+          "release"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "_meta": {
+        "modura/operation": "registry.listReleases",
+        "modura/requires": [
+          "registry.read"
+        ],
+        "modura/service": "registry-go"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "List published contract releases, newest first, with the module versions in each.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "name": "registry_listReleases",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "releases": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "irSha256": {
+                  "description": "SHA-256 of the canonical IR.",
+                  "pattern": "^[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                "irVersion": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "modules": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "maxLength": 60,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "version": {
+                        "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "version"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "number": {
+                  "description": "Sequential release number, starting at 1.",
+                  "format": "int64",
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "publishedAt": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "publishedBy": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "irSha256",
+                "irVersion",
+                "modules",
+                "number",
+                "publishedAt",
+                "publishedBy"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "releases"
+        ],
+        "type": "object"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+name: Set up toolchains
+description: Node and pnpm always. Go and the pnpm install are opt-in so each job pays only for what it uses.
+inputs:
+  install:
+    description: Run pnpm install --frozen-lockfile
+    default: "false"
+  go:
+    description: Install Go (with module and build cache)
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v5
+      with:
+        node-version-file: .node-version
+        cache: pnpm
+    - uses: actions/setup-go@v6
+      if: inputs.go == 'true'
+      with:
+        go-version-file: apps/registry-go/go.mod
+        cache-dependency-path: |
+          apps/registry-go/go.sum
+    - if: inputs.install == 'true'
+      shell: bash
+      run: pnpm install --frozen-lockfile

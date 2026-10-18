@@ -1,0 +1,28 @@
+{
+  "name": "modura",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "verify": "nx run-many -t typecheck lint test generate-check registry-check parity fuzz",
+    "e2e": "pnpm --filter @modura/e2e run e2e",
+    "modura": "tsx packages/cli/src/main.ts",
+    "generate": "pnpm modura generate && pnpm --filter @modura/registry-go --filter @modura/example-calculator run generate",
+    "registry": "DATABASE_URL=${DATABASE_URL:-postgres://modura:modura@localhost:${MODURA_PG_PORT:-55433}/modura?sslmode=disable} go -C apps/registry-go run ./cmd/registry-api",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@modura/cli": "workspace:*",
+    "@modura/module-registry": "workspace:*",
+    "@types/node": "^24.19.2",
+    "nx": "23.3.0",
+    "oxlint": "1.87.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}

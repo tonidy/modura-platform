@@ -1,0 +1,19 @@
+{
+  "name": "@modura/mcp-server",
+  "version": "1.0.0-rc.2",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/server.ts",
+    "./main": "./src/main.ts"
+  },
+  "scripts": {
+    "start": "cd ../.. && tsx apps/mcp-server/src/main.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "@modura/sdk": "workspace:*"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@modura/cli",
+  "version": "1.0.0-rc.2",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/config.ts",
+    "./main": "./src/main.ts"
+  },
+  "imports": {
+    "ajv": "npm:ajv@8.20.0"
+  },
+  "publish": { "exclude": ["**/*.test.ts", "tsconfig.json", "package.json"] }
+}

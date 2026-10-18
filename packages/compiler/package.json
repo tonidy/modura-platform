@@ -1,0 +1,22 @@
+{
+  "name": "@modura/compiler",
+  "version": "1.0.0-rc.2",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/arbitraries.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modura/runtime-contracts": "workspace:*",
+    "@modura/schema": "workspace:*",
+    "ajv": "8.20.0"
+  },
+  "devDependencies": {
+    "fast-check": "4.10.2"
+  }
+}

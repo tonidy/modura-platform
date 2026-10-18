@@ -1,0 +1,15 @@
+node_modules/
+dist/
+apps/registry-go/bin/
+test-results/
+playwright-report/
+coverage/
+.nx/cache/
+.nx/workspace-data/
+*.log
+.env
+.env.*
+!.env.example
+
+# The calculator example keeps its memory here between runs.
+.calculator-state.json

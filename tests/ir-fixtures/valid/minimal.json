@@ -1,0 +1,89 @@
+{
+  "irVersion": "1.0.0",
+  "modules": {
+    "tiny": {
+      "dependencies": [],
+      "description": "Smallest useful module.",
+      "errors": {},
+      "events": {},
+      "operations": {
+        "ping": {
+          "description": "Ping.",
+          "errors": [
+            "FORBIDDEN",
+            "INTERNAL",
+            "RATE_LIMITED",
+            "UNAUTHENTICATED",
+            "UNAVAILABLE",
+            "VALIDATION_FAILED"
+          ],
+          "expose": {
+            "mcp": false
+          },
+          "idempotent": false,
+          "input": {
+            "fields": {},
+            "kind": "object"
+          },
+          "kind": "query",
+          "output": {
+            "kind": "boolean"
+          },
+          "requires": [
+            "tiny.read"
+          ]
+        }
+      },
+      "permissions": {
+        "read": {
+          "description": "Read."
+        }
+      },
+      "subscribes": [],
+      "version": "1.0.0"
+    }
+  },
+  "platformErrors": {
+    "FORBIDDEN": {
+      "category": "forbidden",
+      "description": "The identity lacks a permission the operation requires.",
+      "retryable": false
+    },
+    "IDEMPOTENCY_IN_PROGRESS": {
+      "category": "conflict",
+      "description": "Another request with the same idempotency key did not finish within the lock timeout.",
+      "retryable": true
+    },
+    "IDEMPOTENCY_KEY_REUSED": {
+      "category": "conflict",
+      "description": "The idempotency key was already used with a different request.",
+      "retryable": false
+    },
+    "INTERNAL": {
+      "category": "internal",
+      "description": "An unexpected server error. Details are logged, not returned.",
+      "retryable": false
+    },
+    "RATE_LIMITED": {
+      "category": "rate_limited",
+      "description": "Too many requests from this client.",
+      "retryable": true
+    },
+    "UNAUTHENTICATED": {
+      "category": "unauthenticated",
+      "description": "The request has no valid identity.",
+      "retryable": false
+    },
+    "UNAVAILABLE": {
+      "category": "unavailable",
+      "description": "A dependency such as the database is temporarily unavailable.",
+      "retryable": true
+    },
+    "VALIDATION_FAILED": {
+      "category": "validation",
+      "description": "The request does not match the operation input schema.",
+      "retryable": false
+    }
+  },
+  "types": {}
+}

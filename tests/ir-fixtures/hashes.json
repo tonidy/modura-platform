@@ -1,0 +1,6 @@
+{
+  "valid/escaping.json": "e763a4f26846ecdb4810eb99c87925bf4d0545356382e759b7929146de7d0bec",
+  "valid/full.json": "7d61372516b12b9018680739b8a62714550bb6d5521fbd488a769750ecfd5890",
+  "valid/minimal.json": "1798917e399d7c936846f1a6041153dfd9b5cf1b4c9a4ef5bdfdf43094248de1",
+  "valid/newer-minor-with-unknown-fields.json": "6c608fe0654fb91a59d565d697908a6411ef57688327cc032ea6d83116a2ed7f"
+}

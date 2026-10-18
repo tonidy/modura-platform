@@ -1,0 +1,16 @@
+{
+  "name": "@modura/schema",
+  "version": "1.0.0-rc.2",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modura/runtime-contracts": "workspace:*"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@modura/compiler",
+  "version": "1.0.0-rc.2",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/arbitraries.ts"
+  },
+  "imports": {
+    "ajv": "npm:ajv@8.20.0",
+    "fast-check": "npm:fast-check@4.10.2"
+  },
+  "publish": { "exclude": ["**/*.test.ts", "tsconfig.json", "package.json", "scripts", "src/*-fixtures.ts"] }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@modura/example-calculator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/modules/index.ts"
+  },
+  "scripts": {
+    "calc": "tsx src/main.ts",
+    "modura": "tsx scripts/modura.ts",
+    "generate": "tsx scripts/modura.ts generate",
+    "generate-check": "tsx scripts/modura.ts generate --check --strict",
+    "registry-check": "tsx scripts/modura.ts registry verify && tsx scripts/modura.ts compat --against registry",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modura/schema": "workspace:*",
+    "@modura/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@modura/cli": "workspace:*"
+  }
+}

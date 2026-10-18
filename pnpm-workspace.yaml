@@ -1,0 +1,12 @@
+packages:
+  - apps/*
+  - packages/*
+  - modules/*
+  - examples/*
+  - tests/*
+  - scripts
+
+# Dependencies whose install scripts may run (pnpm 11+; replaces onlyBuiltDependencies).
+allowBuilds:
+  esbuild: true
+  nx: true

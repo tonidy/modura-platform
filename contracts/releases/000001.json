@@ -1,0 +1,393 @@
+{
+  "ir": {
+    "irVersion": "1.0.0",
+    "modules": {
+      "registry": {
+        "dependencies": [],
+        "description": "Published releases of the Modura contracts, checked for compatibility on the server.",
+        "errors": {
+          "INCOMPATIBLE_CHANGE": {
+            "category": "unprocessable",
+            "description": "The release breaks clients of a module whose version does not allow it. Details list the changes and violations.",
+            "retryable": false
+          },
+          "INVALID_IR": {
+            "category": "unprocessable",
+            "description": "The document is not a valid Modura IR document.",
+            "retryable": false
+          },
+          "NOTHING_TO_PUBLISH": {
+            "category": "unprocessable",
+            "description": "The document is identical to the latest release.",
+            "retryable": false
+          },
+          "RELEASE_NOT_FOUND": {
+            "category": "not_found",
+            "description": "No release has this number, or nothing has been published yet.",
+            "retryable": false
+          },
+          "STALE_BASE": {
+            "category": "conflict",
+            "description": "Another release was published since the one this publish was compared against. Compare again, then publish.",
+            "retryable": false
+          }
+        },
+        "events": {},
+        "operations": {
+          "getRelease": {
+            "description": "Get one contract release, or the latest if no number is given, with its IR and its changes against the previous release.",
+            "errors": [
+              "FORBIDDEN",
+              "INTERNAL",
+              "RATE_LIMITED",
+              "UNAUTHENTICATED",
+              "UNAVAILABLE",
+              "VALIDATION_FAILED",
+              "registry.RELEASE_NOT_FOUND"
+            ],
+            "expose": {
+              "mcp": true
+            },
+            "idempotent": false,
+            "input": {
+              "fields": {
+                "number": {
+                  "required": false,
+                  "type": {
+                    "kind": "ref",
+                    "name": "registry.ReleaseNumber"
+                  }
+                }
+              },
+              "kind": "object"
+            },
+            "kind": "query",
+            "output": {
+              "fields": {
+                "ir": {
+                  "required": true,
+                  "type": {
+                    "kind": "json"
+                  }
+                },
+                "release": {
+                  "required": true,
+                  "type": {
+                    "kind": "ref",
+                    "name": "registry.Release"
+                  }
+                }
+              },
+              "kind": "object"
+            },
+            "requires": [
+              "registry.read"
+            ]
+          },
+          "listReleases": {
+            "description": "List published contract releases, newest first, with the module versions in each.",
+            "errors": [
+              "FORBIDDEN",
+              "INTERNAL",
+              "RATE_LIMITED",
+              "UNAUTHENTICATED",
+              "UNAVAILABLE",
+              "VALIDATION_FAILED"
+            ],
+            "expose": {
+              "mcp": true
+            },
+            "idempotent": false,
+            "input": {
+              "fields": {
+                "limit": {
+                  "required": false,
+                  "type": {
+                    "kind": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                  }
+                }
+              },
+              "kind": "object"
+            },
+            "kind": "query",
+            "output": {
+              "fields": {
+                "releases": {
+                  "required": true,
+                  "type": {
+                    "items": {
+                      "kind": "ref",
+                      "name": "registry.ReleaseSummary"
+                    },
+                    "kind": "array"
+                  }
+                }
+              },
+              "kind": "object"
+            },
+            "requires": [
+              "registry.read"
+            ]
+          },
+          "publishRelease": {
+            "description": "Publish a new release of the contracts. The server checks it against the latest release and rejects unversioned breaking changes.",
+            "errors": [
+              "FORBIDDEN",
+              "IDEMPOTENCY_IN_PROGRESS",
+              "IDEMPOTENCY_KEY_REUSED",
+              "INTERNAL",
+              "RATE_LIMITED",
+              "UNAUTHENTICATED",
+              "UNAVAILABLE",
+              "VALIDATION_FAILED",
+              "registry.INCOMPATIBLE_CHANGE",
+              "registry.INVALID_IR",
+              "registry.NOTHING_TO_PUBLISH",
+              "registry.STALE_BASE"
+            ],
+            "expose": {
+              "mcp": false
+            },
+            "idempotent": true,
+            "input": {
+              "fields": {
+                "basedOn": {
+                  "required": false,
+                  "type": {
+                    "kind": "ref",
+                    "name": "registry.ReleaseNumber"
+                  }
+                },
+                "ir": {
+                  "required": true,
+                  "type": {
+                    "description": "The canonical IR document to publish.",
+                    "kind": "json"
+                  }
+                }
+              },
+              "kind": "object"
+            },
+            "kind": "command",
+            "output": {
+              "kind": "ref",
+              "name": "registry.Release"
+            },
+            "requires": [
+              "registry.write"
+            ]
+          }
+        },
+        "permissions": {
+          "read": {
+            "description": "Read published contract releases."
+          },
+          "write": {
+            "description": "Publish contract releases."
+          }
+        },
+        "subscribes": [],
+        "version": "0.2.0"
+      }
+    },
+    "platformErrors": {
+      "FORBIDDEN": {
+        "category": "forbidden",
+        "description": "The identity lacks a permission the operation requires.",
+        "retryable": false
+      },
+      "IDEMPOTENCY_IN_PROGRESS": {
+        "category": "conflict",
+        "description": "Another request with the same idempotency key did not finish within the lock timeout.",
+        "retryable": true
+      },
+      "IDEMPOTENCY_KEY_REUSED": {
+        "category": "conflict",
+        "description": "The idempotency key was already used with a different request.",
+        "retryable": false
+      },
+      "INTERNAL": {
+        "category": "internal",
+        "description": "An unexpected server error. Details are logged, not returned.",
+        "retryable": false
+      },
+      "RATE_LIMITED": {
+        "category": "rate_limited",
+        "description": "Too many requests from this client.",
+        "retryable": true
+      },
+      "UNAUTHENTICATED": {
+        "category": "unauthenticated",
+        "description": "The request has no valid identity.",
+        "retryable": false
+      },
+      "UNAVAILABLE": {
+        "category": "unavailable",
+        "description": "A dependency such as the database is temporarily unavailable.",
+        "retryable": true
+      },
+      "VALIDATION_FAILED": {
+        "category": "validation",
+        "description": "The request does not match the operation input schema.",
+        "retryable": false
+      }
+    },
+    "types": {
+      "registry.Change": {
+        "description": "One difference found by the compatibility check (ADR-0002, ADR-0010).",
+        "fields": {
+          "message": {
+            "required": true,
+            "type": {
+              "kind": "string",
+              "minLength": 1
+            }
+          },
+          "module": {
+            "required": true,
+            "type": {
+              "kind": "string",
+              "minLength": 1
+            }
+          },
+          "path": {
+            "required": true,
+            "type": {
+              "kind": "string",
+              "minLength": 1
+            }
+          },
+          "severity": {
+            "required": true,
+            "type": {
+              "description": "breaking: the wire contract; source: generated code only; safe: neither.",
+              "kind": "enum",
+              "values": [
+                "breaking",
+                "source",
+                "safe"
+              ]
+            }
+          }
+        },
+        "kind": "object"
+      },
+      "registry.ModuleVersion": {
+        "fields": {
+          "name": {
+            "required": true,
+            "type": {
+              "kind": "string",
+              "maxLength": 60,
+              "minLength": 1
+            }
+          },
+          "version": {
+            "required": true,
+            "type": {
+              "kind": "string",
+              "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+            }
+          }
+        },
+        "kind": "object"
+      },
+      "registry.Release": {
+        "fields": {
+          "changes": {
+            "required": true,
+            "type": {
+              "description": "Changes against the previous release. Empty for the first.",
+              "items": {
+                "kind": "ref",
+                "name": "registry.Change"
+              },
+              "kind": "array"
+            }
+          },
+          "summary": {
+            "required": true,
+            "type": {
+              "kind": "ref",
+              "name": "registry.ReleaseSummary"
+            }
+          }
+        },
+        "kind": "object"
+      },
+      "registry.ReleaseNumber": {
+        "description": "Sequential release number, starting at 1.",
+        "kind": "integer",
+        "minimum": 1
+      },
+      "registry.ReleaseSummary": {
+        "fields": {
+          "irSha256": {
+            "required": true,
+            "type": {
+              "description": "SHA-256 of the canonical IR.",
+              "kind": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "irVersion": {
+            "required": true,
+            "type": {
+              "kind": "string",
+              "minLength": 1
+            }
+          },
+          "modules": {
+            "required": true,
+            "type": {
+              "items": {
+                "kind": "ref",
+                "name": "registry.ModuleVersion"
+              },
+              "kind": "array"
+            }
+          },
+          "number": {
+            "required": true,
+            "type": {
+              "kind": "ref",
+              "name": "registry.ReleaseNumber"
+            }
+          },
+          "publishedAt": {
+            "required": true,
+            "type": {
+              "kind": "timestamp"
+            }
+          },
+          "publishedBy": {
+            "required": true,
+            "type": {
+              "kind": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "kind": "object"
+      }
+    }
+  },
+  "release": {
+    "changes": [],
+    "summary": {
+      "irSha256": "c0ecfcc47fd0cfff61378318c3d06e7e38d1b68e0569c8c7a9a3817ea8f067fa",
+      "irVersion": "1.0.0",
+      "modules": [
+        {
+          "name": "registry",
+          "version": "0.2.0"
+        }
+      ],
+      "number": 1,
+      "publishedAt": "2026-10-18T12:28:53.626Z",
+      "publishedBy": "g"
+    }
+  }
+}

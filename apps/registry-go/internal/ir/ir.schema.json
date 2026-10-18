@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:modura:ir:1.0",
+  "title": "Modura IR 1.0",
+  "description": "Structure of a Modura IR 1.0 document. Rules a schema cannot express (references resolve, no reference cycles, declared permissions and errors, event payloads are objects) are listed in docs/spec/ir-1.0.md and checked by both validators.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["irVersion", "modules", "types", "platformErrors"],
+  "properties": {
+    "irVersion": {
+      "type": "string",
+      "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "modules": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/lowerCamelName" },
+      "additionalProperties": { "$ref": "#/$defs/module" }
+    },
+    "types": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/typeName" },
+      "additionalProperties": { "$ref": "#/$defs/type" }
+    },
+    "platformErrors": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/errorCode" },
+      "additionalProperties": { "$ref": "#/$defs/error" }
+    }
+  },
+  "$defs": {
+    "lowerCamelName": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$" },
+    "errorCode": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+    "typeName": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$" },
+    "qualifiedName": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*\\.[a-z][a-zA-Z0-9]*$" },
+    "qualifiedErrorCode": { "type": "string", "pattern": "^([a-z][a-zA-Z0-9]*\\.)?[A-Z][A-Z0-9_]*$" },
+    "version": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+    "text": { "type": "string", "minLength": 1 },
+    "safeInteger": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+    "count": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "description", "dependencies", "permissions", "errors", "operations", "events", "subscribes"],
+      "properties": {
+        "version": { "$ref": "#/$defs/version" },
+        "description": { "$ref": "#/$defs/text" },
+        "dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/lowerCamelName" }
+        },
+        "permissions": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/lowerCamelName" },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["description"],
+            "properties": { "description": { "type": "string" } }
+          }
+        },
+        "errors": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/errorCode" },
+          "additionalProperties": { "$ref": "#/$defs/error" }
+        },
+        "operations": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/lowerCamelName" },
+          "additionalProperties": { "$ref": "#/$defs/operation" }
+        },
+        "events": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/lowerCamelName" },
+          "additionalProperties": { "$ref": "#/$defs/event" }
+        },
+        "subscribes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/qualifiedName" }
+        }
+      }
+    },
+
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "retryable", "description"],
+      "properties": {
+        "category": {
+          "enum": ["validation", "unauthenticated", "forbidden", "not_found", "conflict", "unprocessable", "rate_limited", "internal", "unavailable"]
+        },
+        "retryable": { "type": "boolean" },
+        "description": { "type": "string" }
+      }
+    },
+
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "description", "requires", "idempotent", "input", "output", "errors", "expose"],
+      "properties": {
+        "kind": { "enum": ["query", "command"] },
+        "description": { "$ref": "#/$defs/text" },
+        "requires": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/qualifiedName" }
+        },
+        "idempotent": { "type": "boolean" },
+        "input": { "$ref": "#/$defs/objectType" },
+        "output": { "$ref": "#/$defs/type" },
+        "errors": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/qualifiedErrorCode" }
+        },
+        "expose": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mcp"],
+          "properties": { "mcp": { "type": "boolean" } }
+        }
+      }
+    },
+
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "payload"],
+      "properties": {
+        "description": { "$ref": "#/$defs/text" },
+        "payload": { "$ref": "#/$defs/type" }
+      }
+    },
+
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "type"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "type": { "$ref": "#/$defs/type" }
+      }
+    },
+
+    "type": {
+      "oneOf": [
+        { "$ref": "#/$defs/stringType" },
+        { "$ref": "#/$defs/integerType" },
+        { "$ref": "#/$defs/plainType" },
+        { "$ref": "#/$defs/enumType" },
+        { "$ref": "#/$defs/arrayType" },
+        { "$ref": "#/$defs/objectType" },
+        { "$ref": "#/$defs/refType" }
+      ]
+    },
+    "stringType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "string" },
+        "description": { "type": "string" },
+        "minLength": { "$ref": "#/$defs/count" },
+        "maxLength": { "$ref": "#/$defs/count" },
+        "pattern": { "type": "string" }
+      }
+    },
+    "integerType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "integer" },
+        "description": { "type": "string" },
+        "minimum": { "$ref": "#/$defs/safeInteger" },
+        "maximum": { "$ref": "#/$defs/safeInteger" }
+      }
+    },
+    "plainType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["boolean", "timestamp", "money", "json"] },
+        "description": { "type": "string" }
+      }
+    },
+    "enumType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "values"],
+      "properties": {
+        "kind": { "const": "enum" },
+        "description": { "type": "string" },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+        }
+      }
+    },
+    "arrayType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "items"],
+      "properties": {
+        "kind": { "const": "array" },
+        "description": { "type": "string" },
+        "items": { "$ref": "#/$defs/type" },
+        "minItems": { "$ref": "#/$defs/count" },
+        "maxItems": { "$ref": "#/$defs/count" }
+      }
+    },
+    "objectType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "fields"],
+      "properties": {
+        "kind": { "const": "object" },
+        "description": { "type": "string" },
+        "fields": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/lowerCamelName" },
+          "additionalProperties": { "$ref": "#/$defs/field" }
+        }
+      }
+    },
+    "refType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name"],
+      "properties": {
+        "kind": { "const": "ref" },
+        "name": { "$ref": "#/$defs/typeName" }
+      }
+    }
+  }
+}

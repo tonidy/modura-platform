@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "neverConnectToCloud": true,
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "sharedGlobals": [
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/docs/spec/**/*",
+      "{workspaceRoot}/packages/compiler/src/ir.schema.json",
+      "{workspaceRoot}/tests/compat-fixtures/**/*",
+      "{workspaceRoot}/tests/ir-fixtures/**/*",
+      "{workspaceRoot}/generated/**/*"
+    ]
+  },
+  "targetDefaults": {
+    "typecheck": {
+      "cache": true,
+      "inputs": ["default", "^default", "sharedGlobals"]
+    },
+    "test": {
+      "cache": true,
+      "inputs": ["default", "^default", "sharedGlobals"]
+    },
+    "generate-check": {
+      "cache": false
+    },
+    "registry-check": {
+      "cache": false
+    },
+    "parity": {
+      "cache": false
+    },
+    "fuzz": {
+      "cache": false
+    }
+  }
+}

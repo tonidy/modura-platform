@@ -1,0 +1,208 @@
+{
+  "tools": [
+    {
+      "_meta": {
+        "modura/operation": "calculator.evaluate",
+        "modura/requires": [
+          "calculator.use"
+        ],
+        "modura/service": "calculator"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Apply an operator to two integers.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "left": {
+            "format": "int64",
+            "maximum": 1000000,
+            "minimum": -1000000,
+            "type": "integer"
+          },
+          "operator": {
+            "description": "What to do with the two operands.",
+            "enum": [
+              "add",
+              "subtract",
+              "multiply",
+              "divide"
+            ],
+            "type": "string"
+          },
+          "right": {
+            "format": "int64",
+            "maximum": 1000000,
+            "minimum": -1000000,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "left",
+          "operator",
+          "right"
+        ],
+        "type": "object"
+      },
+      "name": "calculator_evaluate",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "remainder": {
+            "description": "For divide only: what is left over.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "value": {
+            "description": "The result. For divide, the quotient rounded towards zero.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "_meta": {
+        "modura/operation": "calculator.recall",
+        "modura/requires": [
+          "calculator.use"
+        ],
+        "modura/service": "calculator"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Read the result stored in a memory slot.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "slot": {
+            "description": "A memory slot, such as `answer`.",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot"
+        ],
+        "type": "object"
+      },
+      "name": "calculator_recall",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "result": {
+            "additionalProperties": false,
+            "properties": {
+              "remainder": {
+                "description": "For divide only: what is left over.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "value": {
+                "description": "The result. For divide, the quotient rounded towards zero.",
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          },
+          "slot": {
+            "description": "A memory slot, such as `answer`.",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$",
+            "type": "string"
+          },
+          "storedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result",
+          "slot",
+          "storedAt"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "_meta": {
+        "modura/operation": "tape.list",
+        "modura/requires": [
+          "tape.read"
+        ],
+        "modura/service": "tape"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "The latest stored results, newest first.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "name": "tape_list",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "slot": {
+                  "description": "A memory slot, such as `answer`.",
+                  "pattern": "^[a-z][a-z0-9_]{0,31}$",
+                  "type": "string"
+                },
+                "storedAt": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "value": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "slot",
+                "storedAt",
+                "value"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "type": "object"
+      }
+    }
+  ]
+}

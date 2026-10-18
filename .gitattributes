@@ -1,0 +1,12 @@
+# Generated files are committed on purpose: `modura compat --against <ref>` reads the
+# IR from git history, reviewers see a contract change on every surface, and Go builds
+# without the TypeScript toolchain. Stale checks in `pnpm verify` keep
+# them in sync. Marking them generated only collapses them in GitHub diffs.
+generated/**                                 linguist-generated=true
+packages/cli/src/generated/**                linguist-generated=true
+apps/registry-go/internal/api/api.gen.go     linguist-generated=true
+apps/registry-go/internal/ir/ir.schema.json  linguist-generated=true
+
+# Lockfiles.
+pnpm-lock.yaml                               linguist-generated=true
+apps/registry-go/go.sum                      linguist-generated=true

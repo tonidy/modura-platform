@@ -1,0 +1,680 @@
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Platform code or qualified domain code. Clients match on this, never on message.",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "retryable"
+        ],
+        "type": "object"
+      },
+      "Money": {
+        "additionalProperties": false,
+        "properties": {
+          "amountMinor": {
+            "description": "Amount in the currency's minor unit, for example cents.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "description": "ISO 4217 code.",
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amountMinor",
+          "currency"
+        ],
+        "type": "object"
+      },
+      "RegistryChange": {
+        "additionalProperties": false,
+        "description": "One difference found by the compatibility check (ADR-0002, ADR-0010).",
+        "properties": {
+          "message": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "module": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "severity": {
+            "description": "breaking: the wire contract; source: generated code only; safe: neither.",
+            "enum": [
+              "breaking",
+              "source",
+              "safe"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "message",
+          "module",
+          "path",
+          "severity"
+        ],
+        "type": "object"
+      },
+      "RegistryGetReleaseInput": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "$ref": "#/components/schemas/RegistryReleaseNumber"
+          }
+        },
+        "type": "object"
+      },
+      "RegistryGetReleaseOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "ir": {},
+          "release": {
+            "$ref": "#/components/schemas/RegistryRelease"
+          }
+        },
+        "required": [
+          "ir",
+          "release"
+        ],
+        "type": "object"
+      },
+      "RegistryListReleasesInput": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RegistryListReleasesOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "releases": {
+            "items": {
+              "$ref": "#/components/schemas/RegistryReleaseSummary"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "releases"
+        ],
+        "type": "object"
+      },
+      "RegistryModuleVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "RegistryPublishReleaseInput": {
+        "additionalProperties": false,
+        "properties": {
+          "basedOn": {
+            "$ref": "#/components/schemas/RegistryReleaseNumber"
+          },
+          "ir": {
+            "description": "The canonical IR document to publish."
+          }
+        },
+        "required": [
+          "ir"
+        ],
+        "type": "object"
+      },
+      "RegistryRelease": {
+        "additionalProperties": false,
+        "properties": {
+          "changes": {
+            "description": "Changes against the previous release. Empty for the first.",
+            "items": {
+              "$ref": "#/components/schemas/RegistryChange"
+            },
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/RegistryReleaseSummary"
+          }
+        },
+        "required": [
+          "changes",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "RegistryReleaseNumber": {
+        "description": "Sequential release number, starting at 1.",
+        "format": "int64",
+        "minimum": 1,
+        "type": "integer"
+      },
+      "RegistryReleaseSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "irSha256": {
+            "description": "SHA-256 of the canonical IR.",
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "irVersion": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/RegistryModuleVersion"
+            },
+            "type": "array"
+          },
+          "number": {
+            "$ref": "#/components/schemas/RegistryReleaseNumber"
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "publishedBy": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "irSha256",
+          "irVersion",
+          "modules",
+          "number",
+          "publishedAt",
+          "publishedBy"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Modura Contract Registry API: registry-go",
+    "version": "1.0.0-rc.2"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/v1/registry.getRelease": {
+      "post": {
+        "description": "Get one contract release, or the latest if no number is given, with its IR and its changes against the previous release.",
+        "operationId": "registryGetRelease",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistryGetReleaseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryGetReleaseOutput"
+                }
+              }
+            },
+            "description": "Success."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "VALIDATION_FAILED",
+            "x-modura-error-codes": [
+              "VALIDATION_FAILED"
+            ]
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "UNAUTHENTICATED",
+            "x-modura-error-codes": [
+              "UNAUTHENTICATED"
+            ]
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "FORBIDDEN",
+            "x-modura-error-codes": [
+              "FORBIDDEN"
+            ]
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "registry.RELEASE_NOT_FOUND",
+            "x-modura-error-codes": [
+              "registry.RELEASE_NOT_FOUND"
+            ]
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "RATE_LIMITED",
+            "x-modura-error-codes": [
+              "RATE_LIMITED"
+            ]
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "INTERNAL",
+            "x-modura-error-codes": [
+              "INTERNAL"
+            ]
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "UNAVAILABLE",
+            "x-modura-error-codes": [
+              "UNAVAILABLE"
+            ]
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "registry.getRelease",
+        "tags": [
+          "registry"
+        ],
+        "x-modura-idempotent": false,
+        "x-modura-kind": "query",
+        "x-modura-operation": "registry.getRelease",
+        "x-modura-requires": [
+          "registry.read"
+        ]
+      }
+    },
+    "/v1/registry.listReleases": {
+      "post": {
+        "description": "List published contract releases, newest first, with the module versions in each.",
+        "operationId": "registryListReleases",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistryListReleasesInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryListReleasesOutput"
+                }
+              }
+            },
+            "description": "Success."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "VALIDATION_FAILED",
+            "x-modura-error-codes": [
+              "VALIDATION_FAILED"
+            ]
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "UNAUTHENTICATED",
+            "x-modura-error-codes": [
+              "UNAUTHENTICATED"
+            ]
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "FORBIDDEN",
+            "x-modura-error-codes": [
+              "FORBIDDEN"
+            ]
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "RATE_LIMITED",
+            "x-modura-error-codes": [
+              "RATE_LIMITED"
+            ]
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "INTERNAL",
+            "x-modura-error-codes": [
+              "INTERNAL"
+            ]
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "UNAVAILABLE",
+            "x-modura-error-codes": [
+              "UNAVAILABLE"
+            ]
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "registry.listReleases",
+        "tags": [
+          "registry"
+        ],
+        "x-modura-idempotent": false,
+        "x-modura-kind": "query",
+        "x-modura-operation": "registry.listReleases",
+        "x-modura-requires": [
+          "registry.read"
+        ]
+      }
+    },
+    "/v1/registry.publishRelease": {
+      "post": {
+        "description": "Publish a new release of the contracts. The server checks it against the latest release and rejects unversioned breaking changes.",
+        "operationId": "registryPublishRelease",
+        "parameters": [
+          {
+            "description": "Unique per attempt, for example per checkout. Retrying with the same key returns the original result.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistryPublishReleaseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryRelease"
+                }
+              }
+            },
+            "description": "Success.",
+            "headers": {
+              "Idempotent-Replayed": {
+                "description": "True when this response replays an earlier request with the same idempotency key.",
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "VALIDATION_FAILED",
+            "x-modura-error-codes": [
+              "VALIDATION_FAILED"
+            ]
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "UNAUTHENTICATED",
+            "x-modura-error-codes": [
+              "UNAUTHENTICATED"
+            ]
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "FORBIDDEN",
+            "x-modura-error-codes": [
+              "FORBIDDEN"
+            ]
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "IDEMPOTENCY_IN_PROGRESS, IDEMPOTENCY_KEY_REUSED, registry.STALE_BASE",
+            "x-modura-error-codes": [
+              "IDEMPOTENCY_IN_PROGRESS",
+              "IDEMPOTENCY_KEY_REUSED",
+              "registry.STALE_BASE"
+            ]
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "registry.INCOMPATIBLE_CHANGE, registry.INVALID_IR, registry.NOTHING_TO_PUBLISH",
+            "x-modura-error-codes": [
+              "registry.INCOMPATIBLE_CHANGE",
+              "registry.INVALID_IR",
+              "registry.NOTHING_TO_PUBLISH"
+            ]
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "RATE_LIMITED",
+            "x-modura-error-codes": [
+              "RATE_LIMITED"
+            ]
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "INTERNAL",
+            "x-modura-error-codes": [
+              "INTERNAL"
+            ]
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "UNAVAILABLE",
+            "x-modura-error-codes": [
+              "UNAVAILABLE"
+            ]
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "registry.publishRelease",
+        "tags": [
+          "registry"
+        ],
+        "x-modura-idempotent": true,
+        "x-modura-kind": "command",
+        "x-modura-operation": "registry.publishRelease",
+        "x-modura-requires": [
+          "registry.write"
+        ]
+      }
+    }
+  }
+}

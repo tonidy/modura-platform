@@ -1,0 +1,308 @@
+{
+  "irVersion": "1.0.0",
+  "modules": {
+    "ledger": {
+      "dependencies": [
+        "shop"
+      ],
+      "description": "Reacts to sales.",
+      "errors": {},
+      "events": {},
+      "operations": {
+        "balance": {
+          "description": "Balance.",
+          "errors": [
+            "FORBIDDEN",
+            "INTERNAL",
+            "RATE_LIMITED",
+            "UNAUTHENTICATED",
+            "UNAVAILABLE",
+            "VALIDATION_FAILED"
+          ],
+          "expose": {
+            "mcp": false
+          },
+          "idempotent": false,
+          "input": {
+            "fields": {},
+            "kind": "object"
+          },
+          "kind": "query",
+          "output": {
+            "fields": {
+              "amount": {
+                "required": true,
+                "type": {
+                  "kind": "money"
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "requires": [
+            "ledger.read"
+          ]
+        }
+      },
+      "permissions": {
+        "read": {
+          "description": "Read."
+        }
+      },
+      "subscribes": [
+        "shop.itemReturned"
+      ],
+      "version": "0.1.0"
+    },
+    "shop": {
+      "dependencies": [],
+      "description": "A shop using every type kind.",
+      "errors": {
+        "SOLD_OUT": {
+          "category": "unprocessable",
+          "description": "Nothing left.",
+          "retryable": false
+        }
+      },
+      "events": {
+        "itemSold": {
+          "description": "An item was sold.",
+          "payload": {
+            "fields": {
+              "quantity": {
+                "required": true,
+                "type": {
+                  "kind": "integer",
+                  "minimum": 1
+                }
+              },
+              "sku": {
+                "required": true,
+                "type": {
+                  "kind": "ref",
+                  "name": "shop.Sku"
+                }
+              }
+            },
+            "kind": "object"
+          }
+        }
+      },
+      "operations": {
+        "getItem": {
+          "description": "Get one item.",
+          "errors": [
+            "FORBIDDEN",
+            "INTERNAL",
+            "RATE_LIMITED",
+            "UNAUTHENTICATED",
+            "UNAVAILABLE",
+            "VALIDATION_FAILED"
+          ],
+          "expose": {
+            "mcp": true
+          },
+          "idempotent": false,
+          "input": {
+            "fields": {
+              "sku": {
+                "required": true,
+                "type": {
+                  "kind": "ref",
+                  "name": "shop.Sku"
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "kind": "query",
+          "output": {
+            "kind": "ref",
+            "name": "shop.Item"
+          },
+          "requires": [
+            "shop.read"
+          ]
+        },
+        "sell": {
+          "description": "Sell an item.",
+          "errors": [
+            "FORBIDDEN",
+            "IDEMPOTENCY_IN_PROGRESS",
+            "IDEMPOTENCY_KEY_REUSED",
+            "INTERNAL",
+            "RATE_LIMITED",
+            "UNAUTHENTICATED",
+            "UNAVAILABLE",
+            "VALIDATION_FAILED",
+            "shop.SOLD_OUT"
+          ],
+          "expose": {
+            "mcp": false
+          },
+          "idempotent": true,
+          "input": {
+            "fields": {
+              "quantity": {
+                "required": true,
+                "type": {
+                  "kind": "integer",
+                  "minimum": 1
+                }
+              },
+              "sku": {
+                "required": true,
+                "type": {
+                  "kind": "ref",
+                  "name": "shop.Sku"
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "kind": "command",
+          "output": {
+            "fields": {
+              "item": {
+                "required": true,
+                "type": {
+                  "kind": "ref",
+                  "name": "shop.Item"
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "requires": [
+            "shop.write"
+          ]
+        }
+      },
+      "permissions": {
+        "read": {
+          "description": "Read items."
+        },
+        "write": {
+          "description": "Sell items."
+        }
+      },
+      "subscribes": [],
+      "version": "1.2.0"
+    }
+  },
+  "platformErrors": {
+    "FORBIDDEN": {
+      "category": "forbidden",
+      "description": "The identity lacks a permission the operation requires.",
+      "retryable": false
+    },
+    "IDEMPOTENCY_IN_PROGRESS": {
+      "category": "conflict",
+      "description": "Another request with the same idempotency key did not finish within the lock timeout.",
+      "retryable": true
+    },
+    "IDEMPOTENCY_KEY_REUSED": {
+      "category": "conflict",
+      "description": "The idempotency key was already used with a different request.",
+      "retryable": false
+    },
+    "INTERNAL": {
+      "category": "internal",
+      "description": "An unexpected server error. Details are logged, not returned.",
+      "retryable": false
+    },
+    "RATE_LIMITED": {
+      "category": "rate_limited",
+      "description": "Too many requests from this client.",
+      "retryable": true
+    },
+    "UNAUTHENTICATED": {
+      "category": "unauthenticated",
+      "description": "The request has no valid identity.",
+      "retryable": false
+    },
+    "UNAVAILABLE": {
+      "category": "unavailable",
+      "description": "A dependency such as the database is temporarily unavailable.",
+      "retryable": true
+    },
+    "VALIDATION_FAILED": {
+      "category": "validation",
+      "description": "The request does not match the operation input schema.",
+      "retryable": false
+    }
+  },
+  "types": {
+    "shop.Item": {
+      "fields": {
+        "active": {
+          "required": true,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "extra": {
+          "required": false,
+          "type": {
+            "kind": "json"
+          }
+        },
+        "name": {
+          "required": true,
+          "type": {
+            "kind": "string",
+            "minLength": 1
+          }
+        },
+        "price": {
+          "required": true,
+          "type": {
+            "kind": "money"
+          }
+        },
+        "sku": {
+          "required": true,
+          "type": {
+            "kind": "ref",
+            "name": "shop.Sku"
+          }
+        },
+        "stock": {
+          "required": true,
+          "type": {
+            "kind": "integer",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        "tags": {
+          "required": true,
+          "type": {
+            "items": {
+              "kind": "enum",
+              "values": [
+                "new",
+                "on_sale"
+              ]
+            },
+            "kind": "array",
+            "maxItems": 3
+          }
+        },
+        "updatedAt": {
+          "required": true,
+          "type": {
+            "kind": "timestamp"
+          }
+        }
+      },
+      "kind": "object"
+    },
+    "shop.Sku": {
+      "kind": "string",
+      "maxLength": 7,
+      "minLength": 7,
+      "pattern": "^[A-Z]{3}-[0-9]{3}$"
+    }
+  }
+}

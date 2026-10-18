@@ -1,0 +1,373 @@
+{
+  "irVersion": "1.0.0",
+  "modules": {
+    "calculator": {
+      "dependencies": [],
+      "description": "Integer arithmetic with a named memory.",
+      "errors": {
+        "DIVISION_BY_ZERO": {
+          "category": "unprocessable",
+          "description": "The right operand of a division is zero.",
+          "retryable": false
+        },
+        "MEMORY_FULL": {
+          "category": "unprocessable",
+          "description": "Every memory slot is taken. Overwrite an existing slot instead.",
+          "retryable": false
+        },
+        "SLOT_NOT_FOUND": {
+          "category": "not_found",
+          "description": "Nothing is stored in this slot.",
+          "retryable": false
+        }
+      },
+      "events": {
+        "resultStored": {
+          "description": "A result was stored in a memory slot.",
+          "payload": {
+            "kind": "ref",
+            "name": "calculator.StoredResult"
+          }
+        }
+      },
+      "operations": {
+        "evaluate": {
+          "description": "Apply an operator to two integers.",
+          "errors": [
+            "FORBIDDEN",
+            "INTERNAL",
+            "RATE_LIMITED",
+            "UNAUTHENTICATED",
+            "UNAVAILABLE",
+            "VALIDATION_FAILED",
+            "calculator.DIVISION_BY_ZERO"
+          ],
+          "expose": {
+            "mcp": true
+          },
+          "idempotent": false,
+          "input": {
+            "fields": {
+              "left": {
+                "required": true,
+                "type": {
+                  "kind": "integer",
+                  "maximum": 1000000,
+                  "minimum": -1000000
+                }
+              },
+              "operator": {
+                "required": true,
+                "type": {
+                  "kind": "ref",
+                  "name": "calculator.Operator"
+                }
+              },
+              "right": {
+                "required": true,
+                "type": {
+                  "kind": "integer",
+                  "maximum": 1000000,
+                  "minimum": -1000000
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "kind": "query",
+          "output": {
+            "kind": "ref",
+            "name": "calculator.Result"
+          },
+          "requires": [
+            "calculator.use"
+          ]
+        },
+        "recall": {
+          "description": "Read the result stored in a memory slot.",
+          "errors": [
+            "FORBIDDEN",
+            "INTERNAL",
+            "RATE_LIMITED",
+            "UNAUTHENTICATED",
+            "UNAVAILABLE",
+            "VALIDATION_FAILED",
+            "calculator.SLOT_NOT_FOUND"
+          ],
+          "expose": {
+            "mcp": true
+          },
+          "idempotent": false,
+          "input": {
+            "fields": {
+              "slot": {
+                "required": true,
+                "type": {
+                  "kind": "ref",
+                  "name": "calculator.SlotName"
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "kind": "query",
+          "output": {
+            "kind": "ref",
+            "name": "calculator.StoredResult"
+          },
+          "requires": [
+            "calculator.use"
+          ]
+        },
+        "store": {
+          "description": "Store a result in a memory slot, replacing what was there. Retrying with the same key stores it once.",
+          "errors": [
+            "FORBIDDEN",
+            "IDEMPOTENCY_IN_PROGRESS",
+            "IDEMPOTENCY_KEY_REUSED",
+            "INTERNAL",
+            "RATE_LIMITED",
+            "UNAUTHENTICATED",
+            "UNAVAILABLE",
+            "VALIDATION_FAILED",
+            "calculator.MEMORY_FULL"
+          ],
+          "expose": {
+            "mcp": false
+          },
+          "idempotent": true,
+          "input": {
+            "fields": {
+              "result": {
+                "required": true,
+                "type": {
+                  "kind": "ref",
+                  "name": "calculator.Result"
+                }
+              },
+              "slot": {
+                "required": true,
+                "type": {
+                  "kind": "ref",
+                  "name": "calculator.SlotName"
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "kind": "command",
+          "output": {
+            "kind": "ref",
+            "name": "calculator.StoredResult"
+          },
+          "requires": [
+            "calculator.write"
+          ]
+        }
+      },
+      "permissions": {
+        "use": {
+          "description": "Evaluate expressions and recall stored results."
+        },
+        "write": {
+          "description": "Store results in memory."
+        }
+      },
+      "subscribes": [],
+      "version": "0.1.0"
+    },
+    "tape": {
+      "dependencies": [
+        "calculator"
+      ],
+      "description": "A running record of stored results.",
+      "errors": {},
+      "events": {},
+      "operations": {
+        "list": {
+          "description": "The latest stored results, newest first.",
+          "errors": [
+            "FORBIDDEN",
+            "INTERNAL",
+            "RATE_LIMITED",
+            "UNAUTHENTICATED",
+            "UNAVAILABLE",
+            "VALIDATION_FAILED"
+          ],
+          "expose": {
+            "mcp": true
+          },
+          "idempotent": false,
+          "input": {
+            "fields": {
+              "limit": {
+                "required": false,
+                "type": {
+                  "kind": "integer",
+                  "maximum": 100,
+                  "minimum": 1
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "kind": "query",
+          "output": {
+            "fields": {
+              "entries": {
+                "required": true,
+                "type": {
+                  "items": {
+                    "kind": "ref",
+                    "name": "tape.Entry"
+                  },
+                  "kind": "array"
+                }
+              }
+            },
+            "kind": "object"
+          },
+          "requires": [
+            "tape.read"
+          ]
+        }
+      },
+      "permissions": {
+        "read": {
+          "description": "Read the tape."
+        }
+      },
+      "subscribes": [
+        "calculator.resultStored"
+      ],
+      "version": "0.1.0"
+    }
+  },
+  "platformErrors": {
+    "FORBIDDEN": {
+      "category": "forbidden",
+      "description": "The identity lacks a permission the operation requires.",
+      "retryable": false
+    },
+    "IDEMPOTENCY_IN_PROGRESS": {
+      "category": "conflict",
+      "description": "Another request with the same idempotency key did not finish within the lock timeout.",
+      "retryable": true
+    },
+    "IDEMPOTENCY_KEY_REUSED": {
+      "category": "conflict",
+      "description": "The idempotency key was already used with a different request.",
+      "retryable": false
+    },
+    "INTERNAL": {
+      "category": "internal",
+      "description": "An unexpected server error. Details are logged, not returned.",
+      "retryable": false
+    },
+    "RATE_LIMITED": {
+      "category": "rate_limited",
+      "description": "Too many requests from this client.",
+      "retryable": true
+    },
+    "UNAUTHENTICATED": {
+      "category": "unauthenticated",
+      "description": "The request has no valid identity.",
+      "retryable": false
+    },
+    "UNAVAILABLE": {
+      "category": "unavailable",
+      "description": "A dependency such as the database is temporarily unavailable.",
+      "retryable": true
+    },
+    "VALIDATION_FAILED": {
+      "category": "validation",
+      "description": "The request does not match the operation input schema.",
+      "retryable": false
+    }
+  },
+  "types": {
+    "calculator.Operator": {
+      "description": "What to do with the two operands.",
+      "kind": "enum",
+      "values": [
+        "add",
+        "subtract",
+        "multiply",
+        "divide"
+      ]
+    },
+    "calculator.Result": {
+      "fields": {
+        "remainder": {
+          "required": false,
+          "type": {
+            "description": "For divide only: what is left over.",
+            "kind": "integer"
+          }
+        },
+        "value": {
+          "required": true,
+          "type": {
+            "description": "The result. For divide, the quotient rounded towards zero.",
+            "kind": "integer"
+          }
+        }
+      },
+      "kind": "object"
+    },
+    "calculator.SlotName": {
+      "description": "A memory slot, such as `answer`.",
+      "kind": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,31}$"
+    },
+    "calculator.StoredResult": {
+      "fields": {
+        "result": {
+          "required": true,
+          "type": {
+            "kind": "ref",
+            "name": "calculator.Result"
+          }
+        },
+        "slot": {
+          "required": true,
+          "type": {
+            "kind": "ref",
+            "name": "calculator.SlotName"
+          }
+        },
+        "storedAt": {
+          "required": true,
+          "type": {
+            "kind": "timestamp"
+          }
+        }
+      },
+      "kind": "object"
+    },
+    "tape.Entry": {
+      "fields": {
+        "slot": {
+          "required": true,
+          "type": {
+            "kind": "ref",
+            "name": "calculator.SlotName"
+          }
+        },
+        "storedAt": {
+          "required": true,
+          "type": {
+            "kind": "timestamp"
+          }
+        },
+        "value": {
+          "required": true,
+          "type": {
+            "kind": "integer"
+          }
+        }
+      },
+      "kind": "object"
+    }
+  }
+}
