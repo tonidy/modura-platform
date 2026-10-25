@@ -77,6 +77,7 @@ Nothing is listed as shipped unless a command, a test or a file proves it.
 | TypeScript and Go agree on IR validity, canonical hashes and compatibility reports | [`tests/ir-fixtures`](tests/ir-fixtures), [`tests/compat-fixtures`](tests/compat-fixtures), [`scripts/compat-parity.sh`](scripts/compat-parity.sh) |
 | Property-based tests and fuzzing for the engine | [`properties.test.ts`](packages/compiler/src/properties.test.ts), Go fuzz targets in `apps/registry-go/internal/{ir,compat}` |
 | Contract Registry service with server-side compatibility, idempotent publishing and optimistic concurrency | [`registry_test.go`](apps/registry-go/internal/httpapi/registry_test.go), [`tests/e2e/registry.spec.ts`](tests/e2e/registry.spec.ts) |
+| The Go service and the Worker answer the registry's HTTP contract identically | [`tests/registry-conformance`](tests/registry-conformance), run against both in CI |
 | File registry, verified append-only, with the same rules as the server | [`file-registry.test.ts`](packages/cli/src/file-registry.test.ts), [`contracts/releases`](contracts/releases) |
 | Read-only MCP server over stdio | [`apps/mcp-server`](apps/mcp-server) |
 | Packages on npm with provenance, published from a tag | [`publish-npm.yml`](.github/workflows/publish-npm.yml), [npm publishing](docs/npm-publishing.md) |
@@ -91,7 +92,7 @@ Nothing is listed as shipped unless a command, a test or a file proves it.
 
 ## Development
 
-Requirements: Node 24 and pnpm 12 (pinned in `mise.toml`), Go 1.27, and Docker or Podman with Compose for Postgres.
+Requirements: Node 26 and pnpm 12 (pinned in `mise.toml`), Go 1.27, and Docker or Podman with Compose for Postgres.
 
 ```sh
 pnpm install
@@ -137,6 +138,7 @@ contracts/releases            this repository's release history (file registry)
 tests/ir-fixtures             IR documents both validators must judge identically
 tests/compat-fixtures         compatibility cases both checkers must report identically
 tests/e2e                     the registry end to end
+tests/registry-conformance    one HTTP suite, run against the Go service and the Worker
 docs/                         plan, spec, stability policy, ADRs
 ```
 

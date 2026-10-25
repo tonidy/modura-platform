@@ -24,7 +24,7 @@ jobs:
   ts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup
@@ -36,8 +36,9 @@ jobs:
           -t typecheck test generate-check registry-check
           --exclude=@modura/registry-go
 
-  # Go (the registry): vet, tests (contract and concurrency tests
-  # against Postgres) and the stale oapi-codegen output check. Needs no node_modules: pnpm only runs the package scripts.
+  # Go (the registry): vet, tests (contract and concurrency tests against Postgres),
+  # the stale oapi-codegen output check, and the HTTP conformance suite it shares with
+  # the Worker (tests/registry-conformance; the ts job runs the Worker half).
   go:
     runs-on: ubuntu-latest
     services:
@@ -58,19 +59,21 @@ jobs:
       DATABASE_URL: postgres://modura:modura@localhost:5432/modura?sslmode=disable
       MODURA_REQUIRE_DB: "1"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           go: "true"
+          install: "true"
       - run: pnpm --filter @modura/registry-go run typecheck
       - run: pnpm --filter @modura/registry-go run test
       - run: pnpm --filter @modura/registry-go run generate-check
+      - run: pnpm --filter @modura/registry-conformance exec vitest run go.test.ts
 
   # TypeScript/Go random compatibility parity, then the two Go fuzz targets (10 s each).
   parity-fuzz:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           install: "true"
@@ -82,7 +85,7 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           install: "true"
@@ -94,7 +97,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup
@@ -131,7 +134,7 @@ jobs:
     env:
       MODURA_REQUIRE_DB: "1"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           install: "true"
@@ -140,7 +143,7 @@ jobs:
         env:
           E2E_DATABASE_URL: postgres://modura:modura@localhost:5432/modura_e2e?sslmode=disable
           DATABASE_URL: postgres://modura:modura@localhost:5432/modura?sslmode=disable
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-traces

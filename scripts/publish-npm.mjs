@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +7,12 @@ import { execFileSync } from 'node:child_process';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const publish = process.argv.includes('--publish');
 const provenance = process.env.NPM_PROVENANCE === '1';
+// Development builds (publish-dev.yml) go to another registry under their own
+// dist-tag, with a suffix that makes each version unique: 1.0.0-rc.4.dev.12.g1a2b3c4.
+const registry = process.env.NPM_REGISTRY;
+const forcedTag = process.env.NPM_DIST_TAG;
+const versionSuffix = process.env.NPM_VERSION_SUFFIX;
+const registryArgs = registry ? ['--registry', registry] : [];
 const packages = [
   'packages/runtime-contracts',
   'packages/schema',
@@ -27,6 +33,16 @@ if (provenance && releaseTag) {
     if (manifest.version !== taggedVersion) {
       throw new Error(`${manifest.name} is ${manifest.version}, but tag ${releaseTag} expects ${taggedVersion}`);
     }
+  }
+}
+if (versionSuffix) {
+  // Rewrites the manifests in place, before any pack, so `workspace:` ranges resolve
+  // to the suffixed versions too. Meant for CI checkouts, not a working tree.
+  for (const relative of packages) {
+    const path = resolve(root, relative, 'package.json');
+    const manifest = JSON.parse(await readFile(path, 'utf8'));
+    manifest.version += `${manifest.version.includes('-') ? '.' : '-'}${versionSuffix}`;
+    await writeFile(path, `${JSON.stringify(manifest, null, 2)}\n`);
   }
 }
 const destination = await mkdtemp(resolve(tmpdir(), 'modura-npm-'));
@@ -53,7 +69,7 @@ try {
     }
     if (publish) {
       try {
-        const existing = execFileSync('npm', ['view', `${manifest.name}@${manifest.version}`, 'version'], {
+        const existing = execFileSync('npm', ['view', `${manifest.name}@${manifest.version}`, 'version', ...registryArgs], {
           cwd: packageDir,
           encoding: 'utf8',
           stdio: ['ignore', 'pipe', 'pipe'],
@@ -70,7 +86,7 @@ try {
     console.log(`${publish ? 'Publishing' : 'Packed'} ${manifest.name}@${manifest.version}: ${archivePath}`);
     if (publish) {
       const tag = distTag(manifest, packageDir);
-      const args = ['publish', archivePath, '--access', 'public', '--tag', tag];
+      const args = ['publish', archivePath, '--access', 'public', '--tag', tag, ...registryArgs];
       if (provenance) args.push('--provenance');
       execFileSync('npm', args, { cwd: packageDir, stdio: 'inherit' });
     }
@@ -85,10 +101,11 @@ try {
 // A prerelease goes to `next` only once a stable version holds `latest`. Until then
 // it takes `latest`, so `npm install @modura/cli` gets the newest release candidate.
 function distTag(manifest, packageDir) {
+  if (forcedTag) return forcedTag;
   if (!manifest.version.includes('-')) return 'latest';
   let latest = '';
   try {
-    latest = execFileSync('npm', ['view', manifest.name, 'dist-tags.latest'], {
+    latest = execFileSync('npm', ['view', manifest.name, 'dist-tags.latest', ...registryArgs], {
       cwd: packageDir,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],

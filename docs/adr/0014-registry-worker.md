@@ -10,7 +10,7 @@ The Go registry (ADR-0008) needs a host that runs a Go binary and a Postgres dat
 
 We add `apps/registry-worker`, a TypeScript Worker that serves the same HTTP contract as the Go service. The Go service stays.
 
-- **Same contract, same answers.** Routes, error codes, messages, `details`, the `Idempotent-Replayed` header and the order of checks (rate limit, token, permission, input schema) match `apps/registry-go`. The Go HTTP tests are ported to `test/registry.test.ts` and run in workerd.
+- **Same contract, same answers.** Routes, error codes, messages, `details`, the `Idempotent-Replayed` header and the order of checks (rate limit, token, permission, input schema) match `apps/registry-go`. One HTTP suite, `tests/registry-conformance`, runs against both: the Worker in workerd and the Go service as a process with its own database. The Worker's own tests cover only its rate limiting.
 - **One Durable Object holds everything.** Releases and idempotency keys live in its SQLite storage. A Durable Object handles one event at a time and `publish()` never awaits, so publishes are serial without an advisory lock. `STALE_BASE` and idempotent replay keep their meaning. `IDEMPOTENCY_IN_PROGRESS` cannot happen, because no other request can see a key half-claimed.
 - **Append-only is still enforced by the database.** Triggers reject `UPDATE` and `DELETE` on `contract_releases`.
 - **The rules come from `@modura/compiler`**, not a third port. The file registry (ADR-0012) already uses the TypeScript validator and compatibility check, and the shared fixtures keep them in line with Go.
@@ -27,6 +27,6 @@ We add `apps/registry-worker`, a TypeScript Worker that serves the same HTTP con
 ## Consequences
 
 - Every read also goes through the one Durable Object. That is fine for registry traffic. If reads ever need to scale, they can move to a cache in front.
-- There are now two server implementations to keep in step. Both are tested against the same cases, but the Worker tests are a port of the Go tests, not a shared suite.
+- There are now two server implementations to keep in step. The conformance suite fails when their answers differ, but it covers what both share: rate limiting is configured differently in each and stays in their own tests.
 - We ran the registry under `celld dev` (celld 0.6.3): the CLI publishes and checks compatibility against it, the edge cases behave as on workerd, and releases survive a restart. We have not run a multi-node celld fleet.
 - celld does not give a Worker the client's address. Behind celld, a per-IP limit needs `MODURA_CLIENT_IP_HEADER` and a load balancer that overwrites that header. Without it, the limit falls back to per identity, which we checked under `celld dev`.

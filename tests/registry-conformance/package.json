@@ -1,0 +1,23 @@
+{
+  "name": "@modura/registry-conformance",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1",
+    "pg": "8.23.1",
+    "wrangler": "4.149.0"
+  },
+  "nx": {
+    "implicitDependencies": ["@modura/registry-worker", "@modura/registry-go"],
+    "targets": {
+      "test": {
+        "cache": false
+      }
+    }
+  }
+}
