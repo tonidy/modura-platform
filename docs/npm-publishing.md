@@ -32,8 +32,10 @@ The workflow has `id-token: write`, runs on version tags matching `npm-v*`, veri
 Update the version of every package being released and its internal dependency ranges as needed. Versions are immutable on npm; do not reuse an already-published version. Then push a matching tag from the public repository, for example:
 
 ```sh
-git tag npm-v1.0.0-rc.3
-git push origin npm-v1.0.0-rc.3
+git tag npm-v1.0.0-rc.4
+git push origin npm-v1.0.0-rc.4
 ```
 
-The current package versions are prereleases. Decide the next version deliberately before publishing; the first bootstrap package versions are already recorded in their manifests.
+The version also appears in `modura.config.ts` (the registry API version), so run `pnpm generate` after a bump and commit the regenerated OpenAPI and Go code with it.
+
+Dist-tags: a stable version takes `latest`. A prerelease takes `latest` too while no stable version exists, and `next` after that, so a release candidate never replaces a stable release for `npm install`.

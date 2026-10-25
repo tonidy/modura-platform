@@ -69,7 +69,7 @@ try {
     }
     console.log(`${publish ? 'Publishing' : 'Packed'} ${manifest.name}@${manifest.version}: ${archivePath}`);
     if (publish) {
-      const tag = manifest.version.includes('-') ? 'next' : 'latest';
+      const tag = distTag(manifest, packageDir);
       const args = ['publish', archivePath, '--access', 'public', '--tag', tag];
       if (provenance) args.push('--provenance');
       execFileSync('npm', args, { cwd: packageDir, stdio: 'inherit' });
@@ -80,4 +80,22 @@ try {
   }
 } finally {
   await rm(destination, { recursive: true, force: true });
+}
+
+// A prerelease goes to `next` only once a stable version holds `latest`. Until then
+// it takes `latest`, so `npm install @modura/cli` gets the newest release candidate.
+function distTag(manifest, packageDir) {
+  if (!manifest.version.includes('-')) return 'latest';
+  let latest = '';
+  try {
+    latest = execFileSync('npm', ['view', manifest.name, 'dist-tags.latest'], {
+      cwd: packageDir,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
+  } catch (error) {
+    const stderr = error.stderr?.toString() ?? '';
+    if (!stderr.includes('E404')) throw error;
+  }
+  return latest && !latest.includes('-') ? 'next' : 'latest';
 }

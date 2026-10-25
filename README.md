@@ -6,7 +6,7 @@ The platform is built and tested against a real application: a point-of-sale sys
 
 ## Using it
 
-The packages are on npm as `@modura/*`, currently `1.0.0-rc.3`, published with provenance from GitHub Actions. See [docs/stability.md](docs/stability.md) for the versioning policy and [npm publishing](docs/npm-publishing.md) for release setup.
+The packages are on npm as `@modura/*`, currently `1.0.0-rc.4`, published with provenance from GitHub Actions. See [docs/stability.md](docs/stability.md) for the versioning policy and [npm publishing](docs/npm-publishing.md) for release setup.
 
 ```sh
 pnpm add -D @modura/cli @modura/schema
@@ -35,7 +35,7 @@ modura publish                           # add a release to the registry (files 
 modura registry verify --since main      # check a file registry is append-only and valid
 ```
 
-`@modura/cli` installs the `modura` command, and `@modura/mcp-server` installs `modura-mcp` (both after `1.0.0-rc.3`). Run them through package scripts or `pnpm exec`. `modura.config.ts` is loaded by Node's own type stripping, so no TypeScript loader is needed.
+`@modura/cli` installs the `modura` command, and `@modura/mcp-server` installs `modura-mcp` (both since `1.0.0-rc.4`). Run them through package scripts or `pnpm exec`. `modura.config.ts` is loaded by Node's own type stripping, so no TypeScript loader is needed.
 
 ## What is in the box
 

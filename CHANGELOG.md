@@ -2,7 +2,7 @@
 
 Engine packages: `@modura/schema`, `@modura/compiler`, `@modura/runtime-contracts`, `@modura/generator-openapi`, `@modura/generator-sdk-ts`, `@modura/generator-mcp`, `@modura/cli`, `@modura/sdk`, and since 1.0.0-rc.2 `@modura/mcp-server` and `@modura/module-registry`. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [docs/stability.md](docs/stability.md).
 
-## Unreleased
+## 1.0.0-rc.4 (2026-10-25)
 
 ### Added
 
@@ -12,6 +12,7 @@ Engine packages: `@modura/schema`, `@modura/compiler`, `@modura/runtime-contract
 ### Changed
 
 - `@modura/sdk`: a 429, 502, 503 or 504 response without a Modura error body is `UNAVAILABLE` and retryable, as gateways send these when a service is overloaded or down. It was `INTERNAL`.
+- Release candidates take the `latest` dist-tag until a stable version exists, so `npm install @modura/cli` gets this release instead of rc.2. rc.3 went to `next` only.
 
 ### Fixed
 

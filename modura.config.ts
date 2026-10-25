@@ -3,7 +3,7 @@ import { registry } from '@modura/module-registry';
 
 const config: ModuraConfig = {
   modules: [registry],
-  api: { title: 'Modura Contract Registry API', version: '1.0.0-rc.3' },
+  api: { title: 'Modura Contract Registry API', version: '1.0.0-rc.4' },
   services: {
     'registry-go': {
       modules: ['registry'],
