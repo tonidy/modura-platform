@@ -111,8 +111,8 @@ async function route(request: Request, env: Env, ctx: Context): Promise<Response
   if (op.idempotent && !UUID.test(key!)) {
     return error(ctx, 'VALIDATION_FAILED', 'header Idempotency-Key: must be a UUID', { parameter: 'Idempotency-Key' });
   }
-  const text = await request.text();
-  if (text.length > MAX_REQUEST_BYTES) {
+  const text = await readBody(request);
+  if (text === undefined) {
     return error(ctx, 'VALIDATION_FAILED', 'Request body: larger than 1 MiB.');
   }
   let input: unknown;
@@ -200,6 +200,34 @@ function trustedClientIP(request: Request, env: Env): string | undefined {
   const header = env.MODURA_CLIENT_IP_HEADER || (onEdge ? 'CF-Connecting-IP' : undefined);
   if (!header) return undefined;
   return request.headers.get(header)?.split(',').at(-1)?.trim() || undefined;
+}
+
+/**
+ * The body as text, or undefined when it is larger than MAX_REQUEST_BYTES. Counts
+ * bytes, not characters, and stops reading at the limit, like Go's MaxBytesReader,
+ * so a chunked body without Content-Length is not buffered whole.
+ */
+async function readBody(request: Request): Promise<string | undefined> {
+  if (Number(request.headers.get('Content-Length') ?? 0) > MAX_REQUEST_BYTES) return undefined;
+  if (!request.body) return '';
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  const reader = request.body.getReader();
+  for (let next = await reader.read(); !next.done; next = await reader.read()) {
+    size += next.value.byteLength;
+    if (size > MAX_REQUEST_BYTES) {
+      await reader.cancel();
+      return undefined;
+    }
+    chunks.push(next.value);
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
 }
 
 function validationError(ctx: Context, err: ErrorObject): Response {

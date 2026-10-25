@@ -18,7 +18,6 @@
   "repository": "https://github.com/tonidy/modura-platform",
   "files": [
     "dist",
-    "deno.json",
     "README.md"
   ],
   "publishConfig": {

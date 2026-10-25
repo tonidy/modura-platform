@@ -22,22 +22,30 @@ for (const item of packages) {
   const packageDir = resolve(root, item.dir);
   const outdir = resolve(packageDir, 'dist');
   await rm(outdir, { recursive: true, force: true });
+  // Entries named in the package's `bin` get a shebang, so npm can run them.
+  const { bin = {} } = JSON.parse(await readFile(resolve(packageDir, 'package.json'), 'utf8'));
+  const binOutputs = new Set(Object.values(bin).map((path) => path.replace(/^\.\/dist\/(.+)\.js$/, '$1')));
   const entryPoints = Object.entries(item.entries).map(([out, input]) => ({
     out,
     in: resolve(packageDir, input),
   }));
 
-  await build({
-    entryPoints,
-    outdir,
-    bundle: true,
-    packages: 'external',
-    platform: 'node',
-    format: 'esm',
-    target: 'node24',
-    sourcemap: true,
-    logLevel: 'info',
-  });
+  for (const isBin of [false, true]) {
+    const selected = entryPoints.filter((entry) => binOutputs.has(entry.out) === isBin);
+    if (selected.length === 0) continue;
+    await build({
+      entryPoints: selected,
+      outdir,
+      bundle: true,
+      packages: 'external',
+      platform: 'node',
+      format: 'esm',
+      target: 'node24',
+      sourcemap: true,
+      logLevel: 'info',
+      ...(isBin ? { banner: { js: '#!/usr/bin/env node' } } : {}),
+    });
+  }
 
   execFileSync('pnpm', [
     'exec', 'tsc',

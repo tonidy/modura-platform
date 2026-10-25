@@ -7,15 +7,33 @@ Engine packages: `@modura/schema`, `@modura/compiler`, `@modura/runtime-contract
 ### Added
 
 - `validateIr(document, checks)` accepts schema checks compiled ahead of time, and `irJsonSchemas()` returns the schemas to compile. Runtimes that forbid code generation, such as Cloudflare Workers, need this (ADR-0014).
+- `modura` bin in `@modura/cli` and `modura-mcp` bin in `@modura/mcp-server`, so `pnpm exec modura generate` works without a wrapper script.
 
-## 1.0.0-rc.2 (unreleased)
+### Changed
 
-The first release published to JSR. Services, for the Python reports service (plan M7, ADR-0011), a file registry (plan M8, ADR-0012), and the split of the platform from the POS (plan M9, ADR-0013).
+- `@modura/sdk`: a 429, 502, 503 or 504 response without a Modura error body is `UNAVAILABLE` and retryable, as gateways send these when a service is overloaded or down. It was `INTERNAL`.
+
+### Fixed
+
+- `@modura/sdk`: a 2xx response without a JSON body is an `INTERNAL` failure instead of `{ ok: true, value: undefined }`.
+- `@modura/sdk`: aborting the signal while the response body is read rethrows the abort, as aborting during `fetch` already did, instead of returning a failure.
+
+### Removed
+
+- JSR publishing: the `deno.json` files and the Deno step in CI. The packages are published to npm only (ADR-0015).
+
+## 1.0.0-rc.3 (2026-10-18)
+
+The same contents as rc.2, published from `publish-npm.yml` with npm provenance. rc.2 was published without provenance.
+
+## 1.0.0-rc.2 (2026-10-18)
+
+The first release on npm. Services, for the Python reports service (plan M7, ADR-0011), a file registry (plan M8, ADR-0012), and the split of the platform from the POS (plan M9, ADR-0013).
 
 ### Added
 
-- Every package is published to JSR under `@modura`, from a Deno workspace, under the MIT licence.
-- `@modura/cli/main` and `@modura/mcp-server/main` entry points, because JSR packages have no `bin` entries.
+- Every package is published to npm under `@modura` with JavaScript and type declarations built by `scripts/build-npm.mjs`, under the MIT licence.
+- `@modura/cli/main` and `@modura/mcp-server/main` entry points, to run the CLI and the MCP server from a wrapper script.
 - `ir.schema.json` ships inside `@modura/compiler` (it moved from `docs/spec`).
 - File registry: `--registry file:<dir>` for `modura publish` and `modura compat --against registry`, writing one canonical JSON release file per release, with the server's rules and error codes. `registry` in `modura.config.ts` sets the default target.
 - `modura registry verify [--since <git-ref>]`: checks a file registry for gaps, renamed, edited or hand-formatted files, invalid IR, and, with `--since`, changed or deleted old releases and new releases that `modura publish` would not have written.

@@ -6,7 +6,11 @@ The platform is built and tested against a real application: a point-of-sale sys
 
 ## Using it
 
-The packages are versioned `1.0.0-rc.2` and pass a JSR publish dry-run in CI. npm-ready JavaScript/declaration artifacts and a GitHub Actions release workflow are in place; the initial npm bootstrap publish has not happened yet. See [docs/stability.md](docs/stability.md) for the versioning policy and [npm publishing](docs/npm-publishing.md) for release setup.
+The packages are on npm as `@modura/*`, currently `1.0.0-rc.3`, published with provenance from GitHub Actions. See [docs/stability.md](docs/stability.md) for the versioning policy and [npm publishing](docs/npm-publishing.md) for release setup.
+
+```sh
+pnpm add -D @modura/cli @modura/schema
+```
 
 ```ts
 // modura.config.ts
@@ -31,7 +35,7 @@ modura publish                           # add a release to the registry (files 
 modura registry verify --since main      # check a file registry is append-only and valid
 ```
 
-JSR packages have no `bin` entries, so a project runs the CLI through a two-line script that imports `@modura/cli/main`, and the MCP server through `@modura/mcp-server/main`. The [POS](https://github.com/tonidy/modura-pos) shows both.
+`@modura/cli` installs the `modura` command, and `@modura/mcp-server` installs `modura-mcp` (both after `1.0.0-rc.3`). Run them through package scripts or `pnpm exec`. `modura.config.ts` is loaded by Node's own type stripping, so no TypeScript loader is needed.
 
 ## What is in the box
 
@@ -75,20 +79,19 @@ Nothing is listed as shipped unless a command, a test or a file proves it.
 | Contract Registry service with server-side compatibility, idempotent publishing and optimistic concurrency | [`registry_test.go`](apps/registry-go/internal/httpapi/registry_test.go), [`tests/e2e/registry.spec.ts`](tests/e2e/registry.spec.ts) |
 | File registry, verified append-only, with the same rules as the server | [`file-registry.test.ts`](packages/cli/src/file-registry.test.ts), [`contracts/releases`](contracts/releases) |
 | Read-only MCP server over stdio | [`apps/mcp-server`](apps/mcp-server) |
-| Packages publishable on JSR, checked on every CI run | [`deno.json`](deno.json), `deno publish --dry-run` in [CI](.github/workflows/ci.yml) |
+| Packages on npm with provenance, published from a tag | [`publish-npm.yml`](.github/workflows/publish-npm.yml), [npm publishing](docs/npm-publishing.md) |
 | A real consumer in its own repository | [modura-pos](https://github.com/tonidy/modura-pos) |
 
 | Not shipped | Status |
 |---|---|
-| First release on JSR | Ready (dry run passes); published from the public repository's CI |
-| npm packages | JSR's npm compatibility layer covers npm users for now |
+| JSR packages | Dropped for npm ([ADR-0015](docs/adr/0015-npm-only.md)); Deno and Bun read npm packages |
 | A shared Go runtime library (contract middleware) | Copied between Go services until it is worth a library |
 | DevHub, CEL policies, workflows, dynamic fields, a second storage adapter | Post-v1 |
 
 
 ## Development
 
-Requirements: Node 24 (pinned in `mise.toml`), pnpm 10, Go 1.27, and Docker or Podman with Compose for Postgres.
+Requirements: Node 24 and pnpm 12 (pinned in `mise.toml`), Go 1.27, and Docker or Podman with Compose for Postgres.
 
 ```sh
 pnpm install
@@ -150,5 +153,6 @@ docs/                         plan, spec, stability policy, ADRs
 - [ADR-0012](docs/adr/0012-file-registry.md) File registry: release history in git
 - [ADR-0013](docs/adr/0013-split-platform-and-pos.md) Platform and POS in separate repositories
 - [ADR-0014](docs/adr/0014-registry-worker.md) Contract Registry on Cloudflare Workers
+- [ADR-0015](docs/adr/0015-npm-only.md) Publish to npm only
 
 ADR-0004 (checkout idempotency), ADR-0006 (money) and ADR-0011 (reports service and outbox) are about the POS and live in [modura-pos](https://github.com/tonidy/modura-pos).

@@ -110,8 +110,19 @@ export function createHttpTransport(options: HttpTransportOptions): Transport {
         return failure<Code>('UNAVAILABLE', `Network error: ${String(cause)}`, true, operation);
       }
 
-      const body: unknown = await response.json().catch(() => undefined);
+      let body: unknown;
+      try {
+        body = await response.json();
+      } catch (cause) {
+        if (callOptions.signal?.aborted) throw cause;
+        body = undefined;
+      }
       if (response.ok) {
+        // Every operation has an output type, so a success without a JSON body is a
+        // broken server or proxy, not an empty result.
+        if (body === undefined) {
+          return failure<Code>('INTERNAL', `${response.status} response without a JSON body`, false, operation);
+        }
         return {
           ok: true,
           value: body as Value,
@@ -119,6 +130,11 @@ export function createHttpTransport(options: HttpTransportOptions): Transport {
         };
       }
       if (isModuraError(body)) return { ok: false, error: body as ModuraError<Code> };
+      // Gateways and load balancers answer 429, 502, 503 and 504 themselves when the
+      // service is overloaded or down, so the caller may retry.
+      if (UNAVAILABLE_STATUSES.has(response.status)) {
+        return failure<Code>('UNAVAILABLE', `Service unavailable (${response.status})`, true, operation);
+      }
       return failure<Code>(
         'INTERNAL',
         `Unexpected ${response.status} response without a Modura error body`,
@@ -128,6 +144,8 @@ export function createHttpTransport(options: HttpTransportOptions): Transport {
     },
   };
 }
+
+const UNAVAILABLE_STATUSES = new Set([429, 502, 503, 504]);
 
 function failure<Code extends string>(
   code: string,

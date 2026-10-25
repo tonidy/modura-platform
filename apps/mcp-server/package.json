@@ -2,6 +2,9 @@
   "name": "@modura/mcp-server",
   "version": "1.0.0-rc.3",
   "type": "module",
+  "bin": {
+    "modura-mcp": "./dist/main.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/server.d.ts",
@@ -25,7 +28,6 @@
   "repository": "https://github.com/tonidy/modura-platform",
   "files": [
     "dist",
-    "deno.json",
     "README.md"
   ],
   "publishConfig": {

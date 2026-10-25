@@ -3,8 +3,9 @@ name: CI
 # The checks that `pnpm verify` runs in one go locally are split across parallel jobs
 # here, so the run takes as long as its slowest job. Every target of `pnpm verify` is
 # covered by exactly one job below:
-#   typecheck, lint, test, generate-check, registry-check: ts (TypeScript projects)
-#                                                         and go (the registry's own project)
+#   lint (oxlint over the whole repository, from the root): ts
+#   typecheck, test, generate-check, registry-check: ts (TypeScript projects)
+#                                                    and go (the registry's own project)
 #   parity, fuzz: parity-fuzz
 # Jobs that touch Postgres have their own service container and MODURA_REQUIRE_DB=1,
 # so a missing database fails the run instead of skipping tests.
@@ -29,20 +30,11 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           install: "true"
+      - run: pnpm lint
       - run: >-
           pnpm nx run-many --parallel=4
-          -t typecheck lint test generate-check registry-check
+          -t typecheck test generate-check registry-check
           --exclude=@modura/registry-go
-      # The platform packages must stay publishable on JSR (plan M9): extensions,
-      # explicit types in the public API, licence, file lists. --no-check because tsc
-      # already type-checks everything above, and Deno cannot read the types of
-      # @modelcontextprotocol/sdk subpaths (its `./*` export maps `types.js` to
-      # `types.js.d.ts`).
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-      - name: Platform packages are publishable on JSR
-        run: deno publish --dry-run --no-check
 
   # Go (the registry): vet, tests (contract and concurrency tests
   # against Postgres) and the stale oapi-codegen output check. Needs no node_modules: pnpm only runs the package scripts.

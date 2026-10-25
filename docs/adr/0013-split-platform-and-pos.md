@@ -1,6 +1,6 @@
 # ADR-0013: Platform and POS in separate repositories
 
-Status: Accepted (M9).
+Status: Accepted (M9). Publishing to JSR is superseded by [ADR-0015](0015-npm-only.md): the platform is on npm only.
 
 ## Context
 

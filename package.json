@@ -7,13 +7,14 @@
     "node": ">=24"
   },
   "scripts": {
-    "verify": "nx run-many -t typecheck lint test generate-check registry-check parity fuzz",
+    "verify": "pnpm lint && nx run-many -t typecheck test generate-check registry-check parity fuzz",
     "e2e": "pnpm --filter @modura/e2e run e2e",
     "modura": "tsx packages/cli/src/main.ts",
     "generate": "pnpm modura generate && pnpm --filter @modura/registry-go --filter @modura/registry-worker --filter @modura/example-calculator run generate",
     "registry": "DATABASE_URL=${DATABASE_URL:-postgres://modura:modura@localhost:${MODURA_PG_PORT:-55433}/modura?sslmode=disable} go -C apps/registry-go run ./cmd/registry-api",
     "db:up": "docker compose up -d --wait postgres",
     "db:down": "docker compose down",
+    "lint": "oxlint --deny-warnings",
     "build:npm": "node scripts/build-npm.mjs",
     "publish:npm": "node scripts/publish-npm.mjs",
     "postinstall": "node scripts/build-npm.mjs"

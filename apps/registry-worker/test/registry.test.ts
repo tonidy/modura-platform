@@ -222,6 +222,11 @@ describe('registry worker', () => {
     expectResult(tooMany, 400, 'VALIDATION_FAILED');
     expect(tooMany.body.details).toEqual({ field: 'limit' });
     expectResult(await call(viewer, 'registry.getRelease', { number: 1, extra: true }), 400, 'VALIDATION_FAILED');
+
+    // 600,000 characters but 1.2 MB: the limit counts bytes.
+    const large = await call(viewer, 'registry.getRelease', { number: 1, pad: 'é'.repeat(600_000) });
+    expectResult(large, 400, 'VALIDATION_FAILED');
+    expect(large.body.message).toBe('Request body: larger than 1 MiB.');
   });
 
   test('without a trusted client IP, commands are limited per identity', async () => {

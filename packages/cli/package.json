@@ -2,6 +2,9 @@
   "name": "@modura/cli",
   "version": "1.0.0-rc.3",
   "type": "module",
+  "bin": {
+    "modura": "./dist/main.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/config.d.ts",
@@ -36,7 +39,6 @@
   "repository": "https://github.com/tonidy/modura-platform",
   "files": [
     "dist",
-    "deno.json",
     "README.md"
   ],
   "publishConfig": {

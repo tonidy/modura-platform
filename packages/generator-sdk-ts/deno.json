@@ -1,7 +1,0 @@
-{
-  "name": "@modura/generator-sdk-ts",
-  "version": "1.0.0-rc.3",
-  "license": "MIT",
-  "exports": "./src/index.ts",
-  "publish": { "exclude": ["**/*.test.ts", "tsconfig.json", "package.json"] }
-}
