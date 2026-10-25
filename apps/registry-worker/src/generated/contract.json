@@ -1,0 +1,98 @@
+{
+  "operations": {
+    "/v1/registry.getRelease": {
+      "id": "registry.getRelease",
+      "kind": "query",
+      "requires": [
+        "registry.read"
+      ],
+      "idempotent": false,
+      "check": "input0"
+    },
+    "/v1/registry.listReleases": {
+      "id": "registry.listReleases",
+      "kind": "query",
+      "requires": [
+        "registry.read"
+      ],
+      "idempotent": false,
+      "check": "input1"
+    },
+    "/v1/registry.publishRelease": {
+      "id": "registry.publishRelease",
+      "kind": "command",
+      "requires": [
+        "registry.write"
+      ],
+      "idempotent": true,
+      "check": "input2"
+    }
+  },
+  "errors": {
+    "FORBIDDEN": {
+      "category": "forbidden",
+      "retryable": false,
+      "status": 403
+    },
+    "IDEMPOTENCY_IN_PROGRESS": {
+      "category": "conflict",
+      "retryable": true,
+      "status": 409
+    },
+    "IDEMPOTENCY_KEY_REUSED": {
+      "category": "conflict",
+      "retryable": false,
+      "status": 409
+    },
+    "INTERNAL": {
+      "category": "internal",
+      "retryable": false,
+      "status": 500
+    },
+    "RATE_LIMITED": {
+      "category": "rate_limited",
+      "retryable": true,
+      "status": 429
+    },
+    "UNAUTHENTICATED": {
+      "category": "unauthenticated",
+      "retryable": false,
+      "status": 401
+    },
+    "UNAVAILABLE": {
+      "category": "unavailable",
+      "retryable": true,
+      "status": 503
+    },
+    "VALIDATION_FAILED": {
+      "category": "validation",
+      "retryable": false,
+      "status": 400
+    },
+    "registry.INCOMPATIBLE_CHANGE": {
+      "category": "unprocessable",
+      "retryable": false,
+      "status": 422
+    },
+    "registry.INVALID_IR": {
+      "category": "unprocessable",
+      "retryable": false,
+      "status": 422
+    },
+    "registry.NOTHING_TO_PUBLISH": {
+      "category": "unprocessable",
+      "retryable": false,
+      "status": 422
+    },
+    "registry.RELEASE_NOT_FOUND": {
+      "category": "not_found",
+      "retryable": false,
+      "status": 404
+    },
+    "registry.STALE_BASE": {
+      "category": "conflict",
+      "retryable": false,
+      "status": 409
+    }
+  }
+}

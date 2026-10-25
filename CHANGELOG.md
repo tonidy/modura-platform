@@ -2,6 +2,12 @@
 
 Engine packages: `@modura/schema`, `@modura/compiler`, `@modura/runtime-contracts`, `@modura/generator-openapi`, `@modura/generator-sdk-ts`, `@modura/generator-mcp`, `@modura/cli`, `@modura/sdk`, and since 1.0.0-rc.2 `@modura/mcp-server` and `@modura/module-registry`. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [docs/stability.md](docs/stability.md).
 
+## Unreleased
+
+### Added
+
+- `validateIr(document, checks)` accepts schema checks compiled ahead of time, and `irJsonSchemas()` returns the schemas to compile. Runtimes that forbid code generation, such as Cloudflare Workers, need this (ADR-0014).
+
 ## 1.0.0-rc.2 (unreleased)
 
 The first release published to JSR. Services, for the Python reports service (plan M7, ADR-0011), a file registry (plan M8, ADR-0012), and the split of the platform from the POS (plan M9, ADR-0013).

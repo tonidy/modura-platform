@@ -9,6 +9,6 @@ export {
 } from './compile.ts';
 export { canonicalCompactJson, irSha256 } from './hash.ts';
 export { generatedNames, RESERVED_IDENTIFIERS, type GeneratedName } from './names.ts';
-export { validateIr } from './validate.ts';
+export { irJsonSchemas, validateIr, type IrSchemaChecks, type SchemaCheck } from './validate.ts';
 export * from './ir.ts';
 export * from './ir-utils.ts';

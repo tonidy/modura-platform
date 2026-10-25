@@ -11,25 +11,42 @@ import type { IrDocument, IrType } from './ir.ts';
  * A newer 1.x minor version may add optional fields, which a 1.0 reader ignores:
  * such documents are checked against the schema with every `additionalProperties:
  * false` relaxed.
+ *
+ * By default the schemas are compiled with Ajv on first use. Runtimes that forbid
+ * code generation from strings, such as Cloudflare Workers, pass `checks` compiled
+ * ahead of time from `irJsonSchemas()` instead (apps/registry-worker).
  */
-export function validateIr(document: unknown): string[] {
+export function validateIr(document: unknown, checks?: IrSchemaChecks): string[] {
   const version = (document as { irVersion?: unknown } | null)?.irVersion;
   const minor = typeof version === 'string' ? Number(version.split('.')[1]) : 0;
-  const check = minor > 0 ? lenient() : strict();
+  const check = minor > 0 ? (checks?.lenient ?? lenient()) : (checks?.strict ?? strict());
   if (!check(document)) return (check.errors ?? []).map(describeSchemaError);
   return semanticIssues(document as IrDocument);
+}
+
+/** A compiled JSON Schema check: Ajv's compile() result, or its standalone code. */
+export type SchemaCheck = ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
+
+export interface IrSchemaChecks {
+  readonly strict: SchemaCheck;
+  readonly lenient: SchemaCheck;
+}
+
+/** The JSON Schemas (draft 2020-12) validateIr checks documents against. */
+export function irJsonSchemas(): { strict: object; lenient: object } {
+  return { strict: schema, lenient: relaxed(schema) as object };
 }
 
 let strictValidator: ValidateFunction | undefined;
 let lenientValidator: ValidateFunction | undefined;
 
 function strict(): ValidateFunction {
-  strictValidator ??= new Ajv2020({ allErrors: false, strict: false }).compile(schema);
+  strictValidator ??= new Ajv2020({ allErrors: false, strict: false }).compile(irJsonSchemas().strict);
   return strictValidator;
 }
 
 function lenient(): ValidateFunction {
-  lenientValidator ??= new Ajv2020({ allErrors: false, strict: false }).compile(relaxed(schema) as object);
+  lenientValidator ??= new Ajv2020({ allErrors: false, strict: false }).compile(irJsonSchemas().lenient);
   return lenientValidator;
 }
 

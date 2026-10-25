@@ -1,0 +1,31 @@
+{
+  "name": "@modura/registry-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "tsx scripts/generate.ts",
+    "generate-check": "tsx scripts/generate.ts --check",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@modura/compiler": "workspace:*",
+    "@modura/runtime-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261009.1",
+    "ajv": "8.20.0",
+    "wrangler": "4.149.0"
+  },
+  "nx": {
+    "implicitDependencies": ["@modura/cli"],
+    "targets": {
+      "test": {
+        "cache": false
+      }
+    }
+  }
+}

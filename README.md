@@ -50,6 +50,7 @@ JSR packages have no `bin` entries, so a project runs the CLI through a two-line
 Releases of a contract can live in a registry service or in files committed to git, with the same commands and the same rules.
 
 - **Server**: [`apps/registry-go`](apps/registry-go), a Go service generated from the registry module. The server, not the client, decides whether a release is allowed: it rejects unversioned breaking changes with `registry.INCOMPATIBLE_CHANGE`, and two publishers racing from the same base get one release and one `STALE_BASE` ([ADR-0008](docs/adr/0008-contract-registry.md)).
+- **Worker**: [`apps/registry-worker`](apps/registry-worker), the same service and contract as a Cloudflare Worker with a SQLite-backed Durable Object. It needs no database server, so it runs on the Workers Free plan or on a self-hosted [celld](https://celld.dev) fleet ([ADR-0014](docs/adr/0014-registry-worker.md)).
 - **Files**: one canonical JSON file per release. Git provides history and concurrency (two branches publishing the next release conflict on merge), and `registry verify --since` in CI catches gaps, edits and releases that skip the rules ([ADR-0012](docs/adr/0012-file-registry.md)). This repository keeps its own history in [`contracts/releases`](contracts/releases).
 
 ```sh
@@ -125,6 +126,7 @@ packages/cli                  `modura generate`, `compat`, `publish`, `registry 
 packages/runtime-contracts    canonical error contract
 modules/registry              the Contract Registry's contract, in the DSL
 apps/registry-go              the registry service, with the Go IR parser and compatibility port
+apps/registry-worker          the registry service as a Cloudflare Worker (also runs on celld)
 apps/mcp-server               read-only MCP server over stdio
 examples/calculator           a runnable example: a calculator CLI on a two-module contract, also the tests' fixture
 generated/                    this repository's generated IR, OpenAPI and MCP tools (the registry)
@@ -147,5 +149,6 @@ docs/                         plan, spec, stability policy, ADRs
 - [ADR-0010](docs/adr/0010-schema-engine-1.0.md) Schema engine 1.0
 - [ADR-0012](docs/adr/0012-file-registry.md) File registry: release history in git
 - [ADR-0013](docs/adr/0013-split-platform-and-pos.md) Platform and POS in separate repositories
+- [ADR-0014](docs/adr/0014-registry-worker.md) Contract Registry on Cloudflare Workers
 
 ADR-0004 (checkout idempotency), ADR-0006 (money) and ADR-0011 (reports service and outbox) are about the POS and live in [modura-pos](https://github.com/tonidy/modura-pos).

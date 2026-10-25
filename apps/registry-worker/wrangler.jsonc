@@ -1,0 +1,21 @@
+// The Contract Registry as a Cloudflare Worker. Only keys celld also accepts are used
+// (https://celld.dev/docs/cloudflare-compat#wrangler-configuration), so the same file
+// deploys with `wrangler deploy` and `celld deploy`.
+//
+// Tokens: set MODURA_PUBLISHER_TOKEN as a secret (`wrangler secret put
+// MODURA_PUBLISHER_TOKEN`); without it publishing is off. MODURA_VIEWER_TOKEN and
+// MODURA_CASHIER_TOKEN default to the public demo tokens.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "modura-registry",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [{ "name": "REGISTRY", "class_name": "Registry" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Registry"] }],
+  "vars": {
+    "MODURA_COMMANDS_PER_MIN": "30"
+  }
+}

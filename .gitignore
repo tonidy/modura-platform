@@ -13,3 +13,8 @@ coverage/
 
 # The calculator example keeps its memory here between runs.
 .calculator-state.json
+
+# Wrangler and celld local state, and dev secrets.
+.wrangler/
+.celld/
+.dev.vars
