@@ -46,25 +46,35 @@ import { compatAgainstRegistry, publish } from './registry.ts';
 const usage = `Usage:
   modura generate [--check] [--allow-breaking] [--strict]
   modura compat --against <git-ref | registry> [--registry <url | file:dir>]
-  modura publish [--registry <url | file:dir>]
-  modura registry verify [--registry file:dir] [--since <git-ref>]`;
+  modura publish [--registry <url | file:dir>] [--strict]
+  modura registry verify [--registry file:dir] [--since <git-ref>]
+
+--registry defaults to $MODURA_REGISTRY_URL, then \`registry\` in modura.config.ts.
+Servers read the bearer token from $MODURA_REGISTRY_TOKEN.`;
 
 class UsageError extends Error {}
 
 async function main(argv: readonly string[]): Promise<void> {
   const [command, ...flags] = argv;
+  // Help is answered before anything runs, so `modura publish --help` never publishes.
+  if (command === 'help' || argv.includes('--help') || argv.includes('-h')) {
+    console.log(usage);
+    return;
+  }
   const root = findWorkspaceRoot(process.cwd());
   const config = (await import(pathToFileURL(join(root, 'modura.config.ts')).href))
     .default as ModuraConfig;
 
   switch (command) {
     case 'generate':
+      checkFlags(flags, ['--check', '--allow-breaking', '--strict'], []);
       return generate(root, config, {
         check: flags.includes('--check'),
         allowBreaking: flags.includes('--allow-breaking'),
         strict: flags.includes('--strict'),
       });
     case 'compat': {
+      checkFlags(flags, [], ['--against', '--registry']);
       const ref = flagValue(flags, '--against');
       if (ref === undefined) throw new UsageError(usage);
       if (ref !== 'registry') return compat(root, config, ref);
@@ -74,6 +84,7 @@ async function main(argv: readonly string[]): Promise<void> {
       return compatAgainstRegistry(ir, { url: target.url, token: registryToken('demo-viewer') });
     }
     case 'publish': {
+      checkFlags(flags, ['--strict'], ['--registry']);
       const target = registryTarget(root, config, flags);
       const ir = compileCanonical(config, flags.includes('--strict'));
       if (target.kind === 'files') return publishToFiles(ir, target.dir, display(root, target.dir), publisherName(root));
@@ -81,12 +92,28 @@ async function main(argv: readonly string[]): Promise<void> {
     }
     case 'registry': {
       if (flags[0] !== 'verify') throw new UsageError(usage);
+      checkFlags(flags.slice(1), [], ['--registry', '--since']);
       const target = registryTarget(root, config, flags);
       if (target.kind !== 'files') throw new UsageError('registry verify checks a file registry; pass --registry file:<dir>.');
       return verifyFiles(root, target.dir, flagValue(flags, '--since'));
     }
     default:
       throw new UsageError(usage);
+  }
+}
+
+/**
+ * Rejects what a command does not take, so a typo such as `publish --dry-run`, or
+ * `publish --registry` with its value missing, fails instead of publishing to the
+ * default registry. `switches` stand alone; `options` take the next argument.
+ */
+function checkFlags(flags: readonly string[], switches: readonly string[], options: readonly string[]): void {
+  const args = flags[Symbol.iterator]();
+  for (const flag of args) {
+    if (switches.includes(flag)) continue;
+    if (!options.includes(flag)) throw new UsageError(`Unknown option ${flag}.\n\n${usage}`);
+    const value = args.next().value;
+    if (value === undefined || value.startsWith('-')) throw new UsageError(`${flag} needs a value.`);
   }
 }
 

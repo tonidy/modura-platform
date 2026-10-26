@@ -23,6 +23,7 @@ export interface Env {
   MODURA_PUBLISHER_TOKEN?: string;
   MODURA_CLIENT_IP_HEADER?: string;
   MODURA_COMMANDS_PER_MIN?: string;
+  MODURA_VERSION?: string;
 }
 
 export interface ReleaseSummary {

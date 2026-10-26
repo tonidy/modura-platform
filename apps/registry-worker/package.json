@@ -9,7 +9,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy --var MODURA_VERSION:$(git rev-parse --short=12 HEAD)"
   },
   "dependencies": {
     "@modura/compiler": "workspace:*",

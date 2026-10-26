@@ -20,8 +20,10 @@ To Cloudflare:
 ```sh
 cd apps/registry-worker
 npx wrangler secret put MODURA_PUBLISHER_TOKEN   # without it, publishing is off
-npx wrangler deploy
+pnpm run deploy
 ```
+
+`pnpm run deploy` sets `MODURA_VERSION` to the current commit, which `GET /` reports as `{"name":"modura-registry","version":"<sha>"}`. Use `pnpm run deploy`, not `pnpm deploy`, which is a built-in pnpm command.
 
 To celld: `celld deploy` in this folder, or `celld dev . --port 8787` to try it locally. celld bundles with esbuild, so if it isn't on your `PATH`, set `CELLD_ESBUILD=../../node_modules/.bin/esbuild`. Local state goes in `.celld/`, and `celld dev` reads `.dev.vars` too.
 

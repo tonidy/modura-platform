@@ -59,6 +59,11 @@ async function route(request: Request, env: Env, ctx: Context): Promise<Response
   const { pathname } = new URL(request.url);
   const registry = env.REGISTRY.get(env.REGISTRY.idFromName('registry'));
 
+  // The service name and the commit it was built from. `pnpm run deploy` sets
+  // MODURA_VERSION to the git SHA; without it the version is "dev".
+  if (pathname === '/' && request.method === 'GET') {
+    return json({ name: 'modura-registry', version: env.MODURA_VERSION || 'dev' }, 200, { 'Cache-Control': 'no-store' });
+  }
   if (pathname === '/healthz' && request.method === 'GET') {
     const ok = await registry.ping().catch(() => false);
     return json({ status: ok ? 'ok' : 'database unavailable' }, ok ? 200 : 503, { 'Cache-Control': 'no-store' });

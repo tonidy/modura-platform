@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 
 	"golang.org/x/time/rate"
 
@@ -51,6 +52,7 @@ func New(cfg Config) (http.Handler, error) {
 	})
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", about)
 	mux.HandleFunc("GET /healthz", s.health)
 	api.HandlerWithOptions(strict, api.StdHTTPServerOptions{
 		BaseRouter: mux,
@@ -81,6 +83,23 @@ func (s *server) handleError(w http.ResponseWriter, r *http.Request, err error) 
 	requestID, _ := r.Context().Value(requestIDKey).(string)
 	s.logger.Error("request failed", "requestId", requestID, "path", r.URL.Path, "error", err)
 	writeError(w, r, code, message, nil)
+}
+
+// about answers with the service name and the commit it was built from, which
+// `go build` records from Git. A binary built outside a checkout, or by `go run`,
+// reports "dev".
+func about(w http.ResponseWriter, r *http.Request) {
+	version := "dev"
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" && len(setting.Value) >= 12 {
+				version = setting.Value[:12]
+			}
+		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store")
+	_ = json.NewEncoder(w).Encode(map[string]string{"name": "modura-registry", "version": version})
 }
 
 func (s *server) health(w http.ResponseWriter, r *http.Request) {

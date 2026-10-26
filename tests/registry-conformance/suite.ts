@@ -223,6 +223,11 @@ export function registryConformance(name: string, start: StartRegistry, enabled 
       expect(health.headers.get('Content-Type')).toBe('application/json');
       expect(await health.json()).toEqual({ status: 'ok' });
 
+      const about = await fetch(`${url}/`);
+      expect(about.status).toBe(200);
+      expect(about.headers.get('Content-Type')).toBe('application/json');
+      expect(await about.json()).toEqual({ name: 'modura-registry', version: expect.stringMatching(/^(dev|[0-9a-f]{12})$/) });
+
       const res = await call('', 'registry.listReleases', {});
       expect(res.headers.get('X-Request-Id')).toMatch(/^req_[0-9a-f]{16}$/);
       expect(res.body).toMatchObject({ operation: 'registry.listReleases', requestId: res.headers.get('X-Request-Id') });

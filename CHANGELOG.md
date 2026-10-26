@@ -2,6 +2,16 @@
 
 Engine packages: `@modura/schema`, `@modura/compiler`, `@modura/runtime-contracts`, `@modura/generator-openapi`, `@modura/generator-sdk-ts`, `@modura/generator-mcp`, `@modura/cli`, `@modura/sdk`, and since 1.0.0-rc.2 `@modura/mcp-server` and `@modura/module-registry`. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [docs/stability.md](docs/stability.md).
 
+## Unreleased
+
+### Changed
+
+- `@modura/cli`: every command rejects options it does not take, and options with their value missing. A typo such as `modura publish --dry-run`, or `modura publish --registry` without a target, used to publish to the default registry.
+
+### Fixed
+
+- `@modura/cli`: `modura --help`, `-h`, `help` and `<command> --help` print the usage and exit 0. `modura publish --help` used to publish.
+
 ## 1.0.0-rc.4 (2026-10-25)
 
 ### Added
