@@ -39,7 +39,22 @@ describe('flags', () => {
     ['generate --chek', 'Unknown option --chek.'],
     ['compat --against', '--against needs a value.'],
     ['registry verify --since', '--since needs a value.'],
+    ['registry list --limit', '--limit needs a value.'],
+    ['registry list --limit 0', '--limit takes a whole number from 1 to 100.'],
+    ['registry list --limit 101', '--limit takes a whole number from 1 to 100.'],
   ])('modura %s fails before running', (args, message) => {
     expect(run(args)).toEqual({ status: 1, output: expect.stringContaining(message), registry: [] });
+  });
+});
+
+describe('registry list', () => {
+  it('says when nothing is published', () => {
+    expect(run('registry list')).toEqual({ status: 0, output: 'Nothing published yet.\n', registry: [] });
+  });
+
+  it("lists this repository's own release history", () => {
+    const { status, output } = run('registry list --registry file:contracts/releases --limit 1');
+    expect(status).toBe(0);
+    expect(output).toMatch(/^ +\d+ {2}\d{4}-\d{2}-\d{2} \d{2}:\d{2} {2}.+ {2}[0-9a-f]{12} {2}registry@\d+\.\d+\.\d+\n$/);
   });
 });

@@ -4,6 +4,10 @@ Engine packages: `@modura/schema`, `@modura/compiler`, `@modura/runtime-contract
 
 ## Unreleased
 
+### Added
+
+- `modura registry list [--registry <url | file:dir>] [--limit <1-100>]` prints the newest releases, one line each: number, publish time (UTC), publisher, hash prefix and module versions. It reads a server with the viewer token, or a file registry, and lists 20 by default.
+
 ### Changed
 
 - `@modura/cli`: every command rejects options it does not take, and options with their value missing. A typo such as `modura publish --dry-run`, or `modura publish --registry` without a target, used to publish to the default registry.

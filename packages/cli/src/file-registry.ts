@@ -24,7 +24,11 @@ import {
 } from '@modura/compiler';
 import { generateOpenApi } from '@modura/generator-openapi';
 import { registry } from '@modura/module-registry';
-import type { RegistryGetReleaseOutput, RegistryModuleVersion } from './generated/registry-client.ts';
+import type {
+  RegistryGetReleaseOutput,
+  RegistryModuleVersion,
+  RegistryReleaseSummary,
+} from './generated/registry-client.ts';
 import { fail, printReport } from './output.ts';
 
 /** One release file: the same shape `registry.getRelease` returns. */
@@ -133,6 +137,14 @@ function listReleases(dir: string): Listing {
 export function latestReleaseFile(dir: string): ReleaseFile | null {
   const last = listReleases(dir).releases.at(-1);
   return last === undefined ? null : (JSON.parse(last.text) as ReleaseFile);
+}
+
+/** Up to `limit` release summaries in `dir`, newest first, as `registry.listReleases` returns them. */
+export function releaseSummaries(dir: string, limit: number): RegistryReleaseSummary[] {
+  return listReleases(dir)
+    .releases.toReversed()
+    .slice(0, limit)
+    .map((r) => (JSON.parse(r.text) as ReleaseFile).release.summary);
 }
 
 /** Who publishes: MODURA_PUBLISHER, then `git config user.name`. Never an email address. */

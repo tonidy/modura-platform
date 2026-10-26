@@ -11,9 +11,11 @@ import {
   latestReleaseFile,
   nextRelease,
   releaseFileName,
+  releaseSummaries,
   verifyReleaseFiles,
   type ReleaseFile,
 } from './file-registry.ts';
+import { formatReleases } from './output.ts';
 
 const AT = new Date('2026-10-17T09:00:00.000Z');
 const current = JSON.parse(canonicalJson(compile([calculator, tape]))) as IrDocument;
@@ -122,6 +124,27 @@ describe('publishing to files', () => {
     } else {
       expect(result.ok && result.file.release.changes).toEqual(f.changes);
     }
+  });
+});
+
+describe('registry list', () => {
+  it('returns the summaries newest first, up to the limit', () => {
+    const dir = history();
+    try {
+      expect(releaseSummaries(dir, 20).map((s) => s.number)).toEqual([2, 1]);
+      expect(releaseSummaries(dir, 1)).toEqual([expect.objectContaining({ number: 2, publishedBy: 'tester' })]);
+      expect(releaseSummaries(join(dir, 'missing'), 20)).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('prints one line per release, and says when there is none', () => {
+    const summary = release(null, current).release.summary;
+    expect(formatReleases([summary])).toBe(
+      `     1  2026-10-17 09:00  tester  ${summary.irSha256.slice(0, 12)}  calculator@0.1.0, tape@0.1.0`,
+    );
+    expect(formatReleases([])).toBe('Nothing published yet.');
   });
 });
 

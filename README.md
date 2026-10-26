@@ -32,6 +32,7 @@ export default config;
 modura generate                          # IR, OpenAPI per service, SDK, MCP tools; refuses unversioned breaks
 modura compat --against main             # compare with the contract at a git ref
 modura publish                           # add a release to the registry (files or server)
+modura registry list                     # the newest releases, one line each
 modura registry verify --since main      # check a file registry is append-only and valid
 ```
 
@@ -45,7 +46,7 @@ modura registry verify --since main      # check a file registry is append-only 
 | `@modura/compiler` | Validation, lowering to IR 1.0, canonical JSON and hashing, the compatibility check, and the IR JSON Schema ([IR 1.0](docs/spec/ir-1.0.md)) |
 | `@modura/generator-openapi`, `-sdk-ts`, `-mcp` | One OpenAPI document per service, a typed client that routes each call to its service, read-only MCP tools |
 | `@modura/sdk` | The handwritten transport runtime that generated clients use |
-| `@modura/cli` | `generate`, `compat`, `publish`, `registry verify` |
+| `@modura/cli` | `generate`, `compat`, `publish`, `registry list`, `registry verify` |
 | `@modura/mcp-server` | Serves generated MCP tools over stdio through the SDK, read-only by construction ([ADR-0009](docs/adr/0009-mcp-server.md)) |
 | `@modura/module-registry` | The Contract Registry's own contract, written in the DSL |
 
@@ -126,7 +127,7 @@ packages/schema               DSL types and builders
 packages/compiler             validation, lowering, canonical JSON, compatibility check, IR JSON Schema
 packages/generator-*          OpenAPI, TypeScript SDK and MCP generators
 packages/sdk                  transport runtime for generated clients
-packages/cli                  `modura generate`, `compat`, `publish`, `registry verify`
+packages/cli                  `modura generate`, `compat`, `publish`, `registry list`, `registry verify`
 packages/runtime-contracts    canonical error contract
 modules/registry              the Contract Registry's contract, in the DSL
 apps/registry-go              the registry service, with the Go IR parser and compatibility port

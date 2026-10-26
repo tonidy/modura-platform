@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { checkCompatibility, irSha256, type IrDocument } from '@modura/compiler';
 import { createHttpTransport, type JsonValue } from '@modura/sdk';
 import { createModuraClient } from './generated/registry-client.ts';
-import { fail, printReport } from './output.ts';
+import { fail, formatReleases, printReport } from './output.ts';
 
 export interface RegistryOptions {
   readonly url: string;
@@ -64,6 +64,13 @@ export async function publish(ir: IrDocument, options: RegistryOptions): Promise
     `Published release ${summary.number}${result.replayed ? ' (replayed)' : ''}: ` +
       summary.modules.map((m) => `${m.name}@${m.version}`).join(', '),
   );
+}
+
+/** The newest releases, up to `limit` (the server's default when undefined). */
+export async function listFromRegistry(limit: number | undefined, options: RegistryOptions): Promise<void> {
+  const result = await client(options).registry.listReleases(limit === undefined ? {} : { limit });
+  if (!result.ok) return fail(`Could not read the registry at ${options.url}: ${result.error.code}: ${result.error.message}`);
+  console.log(formatReleases(result.value.releases));
 }
 
 export async function compatAgainstRegistry(ir: IrDocument, options: RegistryOptions): Promise<void> {

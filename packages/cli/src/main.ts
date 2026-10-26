@@ -8,7 +8,8 @@
  *   modura compat --against <git-ref>  compare the current contract with the IR at a git ref
  *   modura compat --against registry   compare with the latest release in the Contract Registry
  *   modura publish                     publish the current contract to the Contract Registry
- *   modura registry verify             check a file registry for gaps, edits and bad releases
+ *   modura registry list               list the newest releases in the Contract Registry
+ *   modura registry verify            check a file registry for gaps, edits and bad releases
  *
  * Registry commands take --registry <target> (default $MODURA_REGISTRY_URL, then
  * `registry` in modura.config.ts, then http://localhost:8080). A target is either a
@@ -38,15 +39,17 @@ import {
   gitHistory,
   publisherName,
   publishToFiles,
+  releaseSummaries,
   verifyReleaseFiles,
 } from './file-registry.ts';
-import { fail, printReport } from './output.ts';
-import { compatAgainstRegistry, publish } from './registry.ts';
+import { fail, formatReleases, printReport } from './output.ts';
+import { compatAgainstRegistry, listFromRegistry, publish } from './registry.ts';
 
 const usage = `Usage:
   modura generate [--check] [--allow-breaking] [--strict]
   modura compat --against <git-ref | registry> [--registry <url | file:dir>]
   modura publish [--registry <url | file:dir>] [--strict]
+  modura registry list [--registry <url | file:dir>] [--limit <1-100>]
   modura registry verify [--registry file:dir] [--since <git-ref>]
 
 --registry defaults to $MODURA_REGISTRY_URL, then \`registry\` in modura.config.ts.
@@ -91,6 +94,14 @@ async function main(argv: readonly string[]): Promise<void> {
       return publish(ir, { url: target.url, token: registryToken(undefined) });
     }
     case 'registry': {
+      if (flags[0] === 'list') {
+        checkFlags(flags.slice(1), [], ['--registry', '--limit']);
+        const limit = limitValue(flagValue(flags, '--limit'));
+        const target = registryTarget(root, config, flags);
+        // A file registry lists 20 by default, like the servers.
+        if (target.kind === 'files') return console.log(formatReleases(releaseSummaries(target.dir, limit ?? 20)));
+        return listFromRegistry(limit, { url: target.url, token: registryToken('demo-viewer') });
+      }
       if (flags[0] !== 'verify') throw new UsageError(usage);
       checkFlags(flags.slice(1), [], ['--registry', '--since']);
       const target = registryTarget(root, config, flags);
@@ -115,6 +126,14 @@ function checkFlags(flags: readonly string[], switches: readonly string[], optio
     const value = args.next().value;
     if (value === undefined || value.startsWith('-')) throw new UsageError(`${flag} needs a value.`);
   }
+}
+
+/** --limit as `registry.listReleases` takes it: a whole number from 1 to 100. */
+function limitValue(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  const limit = Number(value);
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new UsageError('--limit takes a whole number from 1 to 100.');
+  return limit;
 }
 
 function flagValue(flags: readonly string[], name: string): string | undefined {
