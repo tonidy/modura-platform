@@ -1,6 +1,6 @@
 {
   "name": "@modura/cli",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "type": "module",
   "bin": {
     "modura": "./dist/main.js"

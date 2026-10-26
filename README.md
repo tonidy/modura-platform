@@ -6,7 +6,7 @@ The platform is built and tested against a real application: a point-of-sale sys
 
 ## Using it
 
-The packages are on npm as `@modura/*`, currently `1.0.0-rc.4`, published with provenance from GitHub Actions. See [docs/stability.md](docs/stability.md) for the versioning policy and [npm publishing](docs/npm-publishing.md) for release setup.
+The packages are on npm as `@modura/*`, currently `1.0.0-rc.5`, published with provenance from GitHub Actions. See [docs/stability.md](docs/stability.md) for the versioning policy and [npm publishing](docs/npm-publishing.md) for release setup.
 
 ```sh
 pnpm add -D @modura/cli @modura/schema

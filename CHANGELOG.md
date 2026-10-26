@@ -2,7 +2,7 @@
 
 Engine packages: `@modura/schema`, `@modura/compiler`, `@modura/runtime-contracts`, `@modura/generator-openapi`, `@modura/generator-sdk-ts`, `@modura/generator-mcp`, `@modura/cli`, `@modura/sdk`, and since 1.0.0-rc.2 `@modura/mcp-server` and `@modura/module-registry`. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [docs/stability.md](docs/stability.md).
 
-## Unreleased
+## 1.0.0-rc.5 (2026-10-26)
 
 ### Added
 
